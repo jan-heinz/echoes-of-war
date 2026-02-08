@@ -1350,8 +1350,8 @@ MonoBehaviour:
   rightCloseUpKnobPivot: {fileID: 458745065}
   leftCloseUpKnobOutline: {fileID: 429182722}
   rightCloseUpKnobOutline: {fileID: 458745069}
-  turnLeftKey: 15
-  turnRightKey: 18
+  turnLeftKey: 18
+  turnRightKey: 15
   exitCloseUpKey: 60
   turnSpeedDegreesPerSecond: 120
   leftStartAngleDegrees: 0
