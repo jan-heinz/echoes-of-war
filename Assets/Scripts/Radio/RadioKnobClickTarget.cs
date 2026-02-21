@@ -1,37 +1,54 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-// shared click target for both world knobs and close-up knobs
-// inspector needs:
-//  1. controller reference
-//  2. knob id (left/right)
-// on click, asks the controller to open close-up mode
-
+// click target used by radio knobs
+// routes click to radio controller and opens close-up
 public class RadioKnobClickTarget : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private RadioController controller;
     [SerializeField] private RadioKnobId knobId;
     [SerializeField] private bool leftClickOnly = true;
 
-    // called by the event system when object is clicked
+    [Header("Click SFX")]
+    [FormerlySerializedAs("knobClickAudioSource")]
+    [SerializeField] private AudioSource clickAudioSource;
+    [FormerlySerializedAs("knobClickClip")]
+    [SerializeField] private AudioClip clickClip;
+    [FormerlySerializedAs("knobClickVolume")]
+    [SerializeField] [Range(0f, 1f)] private float clickVolume = 1f;
+
+    // called by event system on pointer click
     public void OnPointerClick(PointerEventData eventData)
     {
-        // optional guard
-        // right/middle click does nothing
+        // ignore right/middle click when left-only is enabled
         if (leftClickOnly && eventData.button != PointerEventData.InputButton.Left)
         {
             return;
         }
 
-        // missing controller
+        // controller is required to open close-up
         if (controller == null)
         {
             Debug.LogWarning($"RadioKnobClickTarget ({name}): controller is not assigned");
             return;
         }
 
-        // open close-up
-        // set this knob as active
+        PlayClickSfx();
+
+        // open close-up and focus this knob
         controller.OpenCloseUp(knobId);
+    }
+
+    // plays optional click audio
+    // no-op when clip/source is missing
+    private void PlayClickSfx()
+    {
+        if (clickAudioSource == null || clickClip == null)
+        {
+            return;
+        }
+
+        clickAudioSource.PlayOneShot(clickClip, clickVolume);
     }
 }

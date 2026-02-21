@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 434dcd86a5ca3426b88c03dca27cc0d0
+guid: 1978fc0afd2cd43c89b7aae03ba7180e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7887063144944789843
-    second: 2ndRadio-full_0
+      213: -1041287022619471339
+    second: istockphoto-1196083861-612x612_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 70
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 2ndRadio-full_0
+      name: istockphoto-1196083861-612x612_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 17
-        width: 206
-        height: 127
+        x: 0
+        y: 0
+        width: 283
+        height: 310
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: da69d7c6bd58b8290800000000000000
-      internalID: -7887063144944789843
+      spriteID: 512da8b48fa9c81f0800000000000000
+      internalID: -1041287022619471339
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      2ndRadio-full_0: -7887063144944789843
+      istockphoto-1196083861-612x612_0: -1041287022619471339
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

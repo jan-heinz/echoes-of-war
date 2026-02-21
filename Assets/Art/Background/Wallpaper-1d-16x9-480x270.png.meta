@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 434dcd86a5ca3426b88c03dca27cc0d0
+guid: 9ffc966180ded44be9e5df3bcd19daef
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7887063144944789843
-    second: 2ndRadio-full_0
+      213: 6071636238544989113
+    second: Wallpaper-1d-16x9-480x270_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 70
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 2ndRadio-full_0
+      name: Wallpaper-1d-16x9-480x270_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 17
-        width: 206
-        height: 127
+        x: 0
+        y: 0
+        width: 480
+        height: 270
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: da69d7c6bd58b8290800000000000000
-      internalID: -7887063144944789843
+      spriteID: 9bbecd37df8c24450800000000000000
+      internalID: 6071636238544989113
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      2ndRadio-full_0: -7887063144944789843
+      Wallpaper-1d-16x9-480x270_0: 6071636238544989113
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
