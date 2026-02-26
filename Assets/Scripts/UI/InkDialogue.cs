@@ -16,6 +16,11 @@ public class InkDialogue : MonoBehaviour
 {
     // speaker tag format in ink: # speaker:<id>
     private const string SpeakerTagPrefix = "speaker:";
+    
+    // ui command tag format in ink: # ui:<command>
+    private const string UiTagPrefix = "ui:";
+    private const string DisplayNewspaperCommand = "display_newspaper";
+    private const string HideSubtitlesCommand = "hide_subtitles";
 
     [Serializable]
     private class SpeakerVisual
@@ -46,6 +51,7 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private TMP_Text speakerNameText;
     [SerializeField] private Image speakerPortraitImage;
     [SerializeField] private Button dialogueClickTarget;
+    [SerializeField] private NewspaperPopup newspaperPopup;
     [SerializeField] private bool hidePanelWhenDone = true;
 
     [Header("Speakers")]
@@ -54,6 +60,8 @@ public class InkDialogue : MonoBehaviour
     private Story story;
     private readonly Queue<string> queuedKnots = new Queue<string>();
     private readonly Dictionary<string, SpeakerVisual> speakerLookup = new Dictionary<string, SpeakerVisual>();
+    private bool isPausedForPopup;
+    private bool wasDialoguePanelVisibleBeforePopup;
 
     // wires dialogue click target
     private void Awake()
@@ -73,6 +81,11 @@ public class InkDialogue : MonoBehaviour
             radioTutorialPuzzle.RightKnobTuned += HandleRightKnobTuned;
             radioTutorialPuzzle.LeverPulled += HandleLeverPulled;
         }
+
+        if (newspaperPopup != null)
+        {
+            newspaperPopup.Closed += HandleNewspaperClosed;
+        }
     }
 
     // unhooks optional puzzle events
@@ -83,6 +96,11 @@ public class InkDialogue : MonoBehaviour
             radioTutorialPuzzle.TrueChannelFound -= HandleTrueChannelFound;
             radioTutorialPuzzle.RightKnobTuned -= HandleRightKnobTuned;
             radioTutorialPuzzle.LeverPulled -= HandleLeverPulled;
+        }
+
+        if (newspaperPopup != null)
+        {
+            newspaperPopup.Closed -= HandleNewspaperClosed;
         }
     }
 
@@ -117,6 +135,7 @@ public class InkDialogue : MonoBehaviour
         }
 
         ClearSpeakerVisuals();
+        isPausedForPopup = false;
         dialogueClickTarget.interactable = true;
         AdvanceDialogue();
     }
@@ -220,7 +239,7 @@ public class InkDialogue : MonoBehaviour
     // advances to the next non-empty line
     public void AdvanceDialogue()
     {
-        if (story == null)
+        if (story == null || isPausedForPopup)
         {
             return;
         }
@@ -228,6 +247,11 @@ public class InkDialogue : MonoBehaviour
         while (story.canContinue)
         {
             var nextLine = story.Continue();
+            if (TryHandleUiCommands(story.currentTags))
+            {
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(nextLine))
             {
                 continue;
@@ -269,6 +293,7 @@ public class InkDialogue : MonoBehaviour
         story = new Story(compiledInkJson.text);
         queuedKnots.Clear();
         BuildSpeakerLookup();
+        isPausedForPopup = false;
 
         if (!TryEnterKnot(knotName))
         {
@@ -336,6 +361,109 @@ public class InkDialogue : MonoBehaviour
             speakerPortraitImage.sprite = speaker.Portrait;
             speakerPortraitImage.enabled = speaker.Portrait != null;
         }
+    }
+
+    // checks ink tags for ui commands
+    private bool TryHandleUiCommands(List<string> tags)
+    {
+        if (tags == null || tags.Count == 0)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < tags.Count; i++)
+        {
+            var tag = tags[i];
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                continue;
+            }
+
+            var trimmed = tag.Trim();
+            if (!trimmed.StartsWith(UiTagPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var command = trimmed.Substring(UiTagPrefix.Length).Trim();
+            if (string.Equals(command, DisplayNewspaperCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                ShowNewspaperPopup();
+                return true;
+            }
+
+            if (string.Equals(command, HideSubtitlesCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                HideSubtitleText();
+                continue;
+            }
+        }
+
+        return false;
+    }
+
+    // hides translated subtitle text
+    private void HideSubtitleText()
+    {
+        if (radioTutorialPuzzle == null)
+        {
+            Debug.LogWarning("InkDialogue: radioTutorialPuzzle is not assigned. Cannot hide subtitles.");
+            return;
+        }
+
+        radioTutorialPuzzle.HideSubtitleText();
+    }
+
+    // opens newspaper popup and pauses dialogue 
+    private void ShowNewspaperPopup()
+    {
+        if (newspaperPopup == null)
+        {
+            Debug.LogWarning("InkDialogue: newspaperPopup is not assigned.");
+            return;
+        }
+
+        newspaperPopup.ShowDefault();
+        if (!newspaperPopup.IsOpen)
+        {
+            Debug.LogWarning("InkDialogue: newspaper popup did not open.");
+            return;
+        }
+
+        wasDialoguePanelVisibleBeforePopup = dialoguePanel != null && dialoguePanel.activeSelf;
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(false);
+        }
+
+        isPausedForPopup = true;
+        if (dialogueClickTarget != null)
+        {
+            dialogueClickTarget.interactable = false;
+        }
+    }
+
+    // resumes dialogue when newspaper is closed
+    private void HandleNewspaperClosed()
+    {
+        isPausedForPopup = false;
+
+        var shouldRestoreDialoguePanel = wasDialoguePanelVisibleBeforePopup
+            && story != null
+            && (story.canContinue || queuedKnots.Count > 0);
+
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(shouldRestoreDialoguePanel);
+        }
+
+        if (dialogueClickTarget != null)
+        {
+            dialogueClickTarget.interactable = shouldRestoreDialoguePanel;
+        }
+
+        wasDialoguePanelVisibleBeforePopup = false;
+        AdvanceDialogue();
     }
 
     // extracts speaker id from tag list

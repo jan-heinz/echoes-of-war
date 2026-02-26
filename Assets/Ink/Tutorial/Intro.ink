@@ -28,7 +28,9 @@ Now, if this were a real message, you would report to an offier with what you fo
 
 At this point, the officer would ask for your recommendation for the course of action you recommend the Thorns to take. *WIP, show 3 options between Fortify/Intercept/Reposition.
 
+# ui:hide_subtitles
+
 After you make your recommendation, you will receive a copy of the latest edition of the Golden Rose Gazette if you want to check out the current state of the war.
 
-*WIP, display newspaper*
+# ui:display_newspaper
 -> END

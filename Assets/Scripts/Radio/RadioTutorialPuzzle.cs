@@ -178,6 +178,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
         LeverPulled?.Invoke();
     }
 
+    // hides translated subtitle text object
+    public void HideSubtitleText()
+    {
+        if (subtitleText != null)
+        {
+            subtitleText.gameObject.SetActive(false);
+        }
+    }
+
     // validates required references and clamps config
     private bool ValidateSetup()
     {
