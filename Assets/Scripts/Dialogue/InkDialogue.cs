@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Ink.Runtime;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // minimal ink dialogue flow for tutorial MVP
@@ -52,6 +51,9 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private Image speakerPortraitImage;
     [SerializeField] private Button dialogueClickTarget;
     [SerializeField] private NewspaperPopup newspaperPopup;
+    [SerializeField] private float charactersPerSecond = 45f;
+    [SerializeField] private bool clickCompletesCurrentLine = true;
+    [SerializeField] private AudioSource dialogueVoiceAudioSource;
     [SerializeField] private bool hidePanelWhenDone = true;
 
     [Header("Speakers")]
@@ -62,6 +64,9 @@ public class InkDialogue : MonoBehaviour
     private readonly Dictionary<string, SpeakerVisual> speakerLookup = new Dictionary<string, SpeakerVisual>();
     private bool isPausedForPopup;
     private bool wasDialoguePanelVisibleBeforePopup;
+    private bool isLineRevealing;
+    private string currentFullLine = string.Empty;
+    private Coroutine lineRevealCoroutine;
 
     // wires dialogue click target
     private void Awake()
@@ -102,6 +107,8 @@ public class InkDialogue : MonoBehaviour
         {
             newspaperPopup.Closed -= HandleNewspaperClosed;
         }
+
+        StopLineReveal();
     }
 
     // creates story and shows first line
@@ -147,6 +154,8 @@ public class InkDialogue : MonoBehaviour
         {
             dialogueClickTarget.onClick.RemoveListener(AdvanceDialogue);
         }
+
+        StopLineReveal();
     }
 
     // starts dialogue when left knob is at correct channel
@@ -244,6 +253,16 @@ public class InkDialogue : MonoBehaviour
             return;
         }
 
+        if (isLineRevealing)
+        {
+            if (clickCompletesCurrentLine)
+            {
+                CompleteCurrentLine();
+            }
+
+            return;
+        }
+
         while (story.canContinue)
         {
             var nextLine = story.Continue();
@@ -258,7 +277,7 @@ public class InkDialogue : MonoBehaviour
             }
 
             ApplySpeakerFromTags(story.currentTags);
-            dialogueText.text = nextLine.Trim();
+            ShowLine(nextLine.Trim());
             return;
         }
 
@@ -294,6 +313,7 @@ public class InkDialogue : MonoBehaviour
         queuedKnots.Clear();
         BuildSpeakerLookup();
         isPausedForPopup = false;
+        StopLineReveal();
 
         if (!TryEnterKnot(knotName))
         {
@@ -423,6 +443,7 @@ public class InkDialogue : MonoBehaviour
             return;
         }
 
+        StopLineReveal();
         newspaperPopup.ShowDefault();
         if (!newspaperPopup.IsOpen)
         {
@@ -464,6 +485,100 @@ public class InkDialogue : MonoBehaviour
 
         wasDialoguePanelVisibleBeforePopup = false;
         AdvanceDialogue();
+    }
+
+    // starts displaying a line with typewriter effect
+    private void ShowLine(string line)
+    {
+        currentFullLine = line ?? string.Empty;
+        StopLineReveal();
+
+        if (dialogueText == null)
+        {
+            return;
+        }
+
+        if (charactersPerSecond <= 0f || string.IsNullOrEmpty(currentFullLine))
+        {
+            dialogueText.text = currentFullLine;
+            isLineRevealing = false;
+            return;
+        }
+
+        isLineRevealing = true;
+        lineRevealCoroutine = StartCoroutine(RevealLineRoutine(currentFullLine));
+    }
+
+    // reveals one more character over time
+    private System.Collections.IEnumerator RevealLineRoutine(string line)
+    {
+        dialogueText.text = string.Empty;
+        var revealDelay = 1f / charactersPerSecond;
+        StartDialogueVoice();
+
+        for (var i = 1; i <= line.Length; i++)
+        {
+            dialogueText.text = line.Substring(0, i);
+            if (i < line.Length)
+            {
+                yield return new WaitForSeconds(revealDelay);
+            }
+        }
+
+        isLineRevealing = false;
+        lineRevealCoroutine = null;
+        StopDialogueVoice();
+    }
+
+    // instantly shows the full current line
+    private void CompleteCurrentLine()
+    {
+        StopLineReveal();
+        if (dialogueText != null)
+        {
+            dialogueText.text = currentFullLine;
+        }
+    }
+
+    // stops any active line reveal coroutine
+    private void StopLineReveal()
+    {
+        if (lineRevealCoroutine != null)
+        {
+            StopCoroutine(lineRevealCoroutine);
+            lineRevealCoroutine = null;
+        }
+
+        isLineRevealing = false;
+        StopDialogueVoice();
+    }
+
+    // starts dialogue voice while text is revealing
+    private void StartDialogueVoice()
+    {
+        if (dialogueVoiceAudioSource == null)
+        {
+            return;
+        }
+
+        if (!dialogueVoiceAudioSource.isPlaying)
+        {
+            dialogueVoiceAudioSource.Play();
+        }
+    }
+
+    // stops dialogue voice when reveal is done
+    private void StopDialogueVoice()
+    {
+        if (dialogueVoiceAudioSource == null)
+        {
+            return;
+        }
+
+        if (dialogueVoiceAudioSource.isPlaying)
+        {
+            dialogueVoiceAudioSource.Stop();
+        }
     }
 
     // extracts speaker id from tag list
