@@ -13,6 +13,11 @@ public class NewspaperPopup : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] [TextArea] private string newspaperText;
 
+    [Header("Sfx")]
+    [SerializeField] private AudioSource rustleAudioSource;
+    [SerializeField] private AudioClip[] rustleClips;
+    [SerializeField] [Range(0f, 1f)] private float rustleVolume = 1f;
+
     public event Action Closed;
 
     public bool IsOpen { get; private set; }
@@ -61,6 +66,7 @@ public class NewspaperPopup : MonoBehaviour
         }
 
         IsOpen = opened;
+        PlayRandomRustleSfx();
     }
 
     // forces popup hidden
@@ -79,5 +85,22 @@ public class NewspaperPopup : MonoBehaviour
     {
         Hide();
         Closed?.Invoke();
+    }
+
+    // plays one random rustle clip on popup show
+    private void PlayRandomRustleSfx()
+    {
+        if (rustleAudioSource == null || rustleClips == null || rustleClips.Length == 0)
+        {
+            return;
+        }
+
+        var clip = rustleClips[UnityEngine.Random.Range(0, rustleClips.Length)];
+        if (clip == null)
+        {
+            return;
+        }
+
+        rustleAudioSource.PlayOneShot(clip, rustleVolume);
     }
 }
