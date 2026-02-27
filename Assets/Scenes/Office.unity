@@ -1572,7 +1572,7 @@ AudioSource:
   m_GameObject: {fileID: 650576674}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: af4d5d35cd2f94aa79fac5895b8c2ed1, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 55808c183464b4c49b4a5e792ae0030d, type: 3}
   m_PlayOnAwake: 0
@@ -1962,7 +1962,7 @@ AudioSource:
   m_GameObject: {fileID: 738730990}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: af4d5d35cd2f94aa79fac5895b8c2ed1, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: cc122f1ad684543298d85ebe22953219, type: 3}
   m_PlayOnAwake: 0
@@ -2240,7 +2240,7 @@ AudioSource:
   m_GameObject: {fileID: 821062988}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: af4d5d35cd2f94aa79fac5895b8c2ed1, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: cf3818a7b033749f59a104a2af6148a0, type: 3}
   m_PlayOnAwake: 0
@@ -3539,12 +3539,12 @@ AudioSource:
   m_GameObject: {fileID: 1335476864}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: f2e18a206b14243e6a363f04792a1b48, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: ad664f33669184653adddf4f313767c6, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
-  m_Pitch: 2.6
+  m_Pitch: 1
   Loop: 1
   Mute: 0
   Spatialize: 0
@@ -3824,7 +3824,7 @@ AudioSource:
   m_GameObject: {fileID: 1440151953}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: af4d5d35cd2f94aa79fac5895b8c2ed1, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: cc08665bbcfbe49ebb25cf2b0c4068b7, type: 3}
   m_PlayOnAwake: 0
@@ -4576,6 +4576,7 @@ MonoBehaviour:
   newspaperPopup: {fileID: 36000225}
   charactersPerSecond: 40
   clickCompletesCurrentLine: 1
+  dialogueVoicePitch: 2.4
   dialogueVoiceAudioSource: {fileID: 1335476865}
   hidePanelWhenDone: 1
   speakers:
@@ -4840,7 +4841,7 @@ AudioSource:
   m_GameObject: {fileID: 2085872267}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: af4d5d35cd2f94aa79fac5895b8c2ed1, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 63440451899a140839982d94870e1097, type: 3}
   m_PlayOnAwake: 0

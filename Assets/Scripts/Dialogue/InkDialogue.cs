@@ -53,6 +53,7 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private NewspaperPopup newspaperPopup;
     [SerializeField] private float charactersPerSecond = 45f;
     [SerializeField] private bool clickCompletesCurrentLine = true;
+    [SerializeField] [Range(0f, 3f)] private float dialogueVoicePitch;
     [SerializeField] private AudioSource dialogueVoiceAudioSource;
     [SerializeField] private bool hidePanelWhenDone = true;
 
@@ -560,6 +561,9 @@ public class InkDialogue : MonoBehaviour
         {
             return;
         }
+
+        // apply inspector voice settings
+        dialogueVoiceAudioSource.pitch = dialogueVoicePitch;
 
         if (!dialogueVoiceAudioSource.isPlaying)
         {
