@@ -57,6 +57,8 @@ public class RadioController : MonoBehaviour
     [Header("Close-Up UI")]
     [SerializeField] private GameObject closeUpPanel;
     [SerializeField] private Button closeUpBackButton;
+    [SerializeField] private GameObject worldRadioView;
+    [SerializeField] private GameObject worldJuicerIdleView;
     [SerializeField] private Transform leftCloseUpKnobPivot;
     [SerializeField] private Transform rightCloseUpKnobPivot;
     [SerializeField] private RectTransform closeUpLever;
@@ -218,6 +220,7 @@ public class RadioController : MonoBehaviour
         // show close-up and enable input loop
         isCloseUpOpen = true;
         closeUpPanel.SetActive(true);
+        SetWorldRadioVisible(false);
 
         // keep both world and close-up knob visuals in sync
         SyncAllVisuals();
@@ -237,6 +240,7 @@ public class RadioController : MonoBehaviour
         isCloseUpOpen = true;
         closeUpPanel.SetActive(true);
         isLeverPulling = true;
+        SetWorldRadioVisible(false);
 
         SyncAllVisuals();
         UpdateCloseUpSelectionVisuals();
@@ -252,6 +256,8 @@ public class RadioController : MonoBehaviour
         {
             closeUpPanel.SetActive(false);
         }
+
+        SetWorldRadioVisible(true);
 
         // close-up is no longer visible
         // selection outline should be off
@@ -536,6 +542,19 @@ public class RadioController : MonoBehaviour
         if (closeUpLever != null)
         {
             closeUpLever.anchoredPosition = closeUpLeverStartAnchoredPosition;
+        }
+    }
+
+    private void SetWorldRadioVisible(bool isVisible)
+    {
+        if (worldRadioView != null)
+        {
+            worldRadioView.SetActive(isVisible);
+        }
+
+        if (worldJuicerIdleView != null)
+        {
+            worldJuicerIdleView.SetActive(isVisible);
         }
     }
 

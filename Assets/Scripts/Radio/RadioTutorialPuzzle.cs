@@ -18,12 +18,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
     public event Action RightKnobTuned;
     // raised when player pulls lever and translated text is shown
     public event Action LeverPulled;
+    // raised when the lever is pulled and the post-pull presentation should begin
+    public event Action LeverSequenceStarted;
 
     private enum PuzzleState
     {
         Scan,
         Tune,
         DecodedAwaitLever,
+        LeverSequencePlaying,
         Solved
     }
 
@@ -160,7 +163,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     }
 
     // called by pull lever button
-    // applies translated text and exits close-up
+    // starts the post-pull sequence and exits close-up
     public void PullLever()
     {
         if (puzzleState != PuzzleState.DecodedAwaitLever)
@@ -168,26 +171,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
             return;
         }
 
-        puzzleState = PuzzleState.Solved;
-        SetHint(solvedHintText);
+        puzzleState = PuzzleState.LeverSequencePlaying;
         StopAudioLoops();
-
-        if (subtitleText != null)
-        {
-            subtitleText.text = translatedMessageText;
-            subtitleText.gameObject.SetActive(true);
-        }
-        else
-        {
-            Debug.LogWarning("RadioTutorialPuzzle: subtitleText is not assigned.");
-        }
 
         if (radioController != null && radioController.IsCloseUpOpen)
         {
             radioController.CloseCloseUp();
         }
 
-        LeverPulled?.Invoke();
+        LeverSequenceStarted?.Invoke();
     }
 
     // hides translated subtitle text object
@@ -202,6 +194,29 @@ public class RadioTutorialPuzzle : MonoBehaviour
     public bool CanPullLever()
     {
         return puzzleState == PuzzleState.DecodedAwaitLever;
+    }
+
+    public void CompleteLeverSequence()
+    {
+        if (puzzleState != PuzzleState.LeverSequencePlaying)
+        {
+            return;
+        }
+
+        puzzleState = PuzzleState.Solved;
+        SetHint(solvedHintText);
+
+        if (subtitleText != null)
+        {
+            subtitleText.text = translatedMessageText;
+            subtitleText.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("RadioTutorialPuzzle: subtitleText is not assigned.");
+        }
+
+        LeverPulled?.Invoke();
     }
 
     // validates required references and clamps config
