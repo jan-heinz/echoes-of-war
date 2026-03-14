@@ -48,6 +48,7 @@ public class RadioController : MonoBehaviour
     // when player turns a knob, RadioController sends a KnobChanged and which knob moved (including new angle/value)
     // this is so other systems such as audio, puzzle logic, etc can react without being built into this controller
     public event Action<RadioKnobId, float, float> KnobChanged;
+    public event Action LeverThresholdReached;
 
     [Header("Knob Pivots")]
     [SerializeField] private Transform leftKnobPivot;
@@ -58,6 +59,8 @@ public class RadioController : MonoBehaviour
     [SerializeField] private Button closeUpBackButton;
     [SerializeField] private Transform leftCloseUpKnobPivot;
     [SerializeField] private Transform rightCloseUpKnobPivot;
+    [SerializeField] private RectTransform closeUpLever;
+    [SerializeField] private RectTransform closeUpLeverEndpoint;
 
     [Header("Close-Up Selection")]
     [SerializeField] private Outline leftCloseUpKnobOutline;
@@ -79,6 +82,9 @@ public class RadioController : MonoBehaviour
     [Header("Right Knob Settings")]
     [SerializeField] private KnobRotationSettings rightKnobSettings = new KnobRotationSettings();
 
+    [Header("Lever Settings")]
+    [SerializeField] private float leverPullDurationSeconds = 0.2f;
+
     // runtime angle state
     private float leftAngleDegrees;
     private float rightAngleDegrees;
@@ -91,9 +97,11 @@ public class RadioController : MonoBehaviour
     // close-up runtime state
     private bool isCloseUpOpen;
     private RadioKnobId activeKnob = RadioKnobId.Left;
+    private bool isLeverPulling;
     // stores baseline close-up sprites so deselect can restore them
     private Sprite leftCloseUpKnobDefaultSprite;
     private Sprite rightCloseUpKnobDefaultSprite;
+    private Vector2 closeUpLeverStartAnchoredPosition;
 
     // lets other scripts query close-up state
     public bool IsCloseUpOpen => isCloseUpOpen;
@@ -112,8 +120,9 @@ public class RadioController : MonoBehaviour
     private void Start()
     {
         ValidateSettings();
-        ResetKnobsToDefaults();
         CacheCloseUpDefaultSprites();
+        CacheLeverStartPosition();
+        ResetKnobsToDefaults();
 
         // close-up should start closed
         isCloseUpOpen = false;
@@ -144,17 +153,13 @@ public class RadioController : MonoBehaviour
             return;
         }
 
-        var settings = GetKnobSettings(activeKnob);
-        if (settings.Mode == KnobRotationMode.Click)
+        UpdateLeverPullAnimation();
+        if (isLeverPulling)
         {
-            HandleClickModeInput(settings);
             return;
         }
 
-        clickRepeatTimerSeconds = 0f;
-        lastClickDirection = 0f;
-
-        // read hold input for smooth rotation
+        // read hold input for knob rotation
         var turnDirection = 0f;
         if (IsKeyHeld(turnLeftKey))
         {
@@ -171,6 +176,16 @@ public class RadioController : MonoBehaviour
         {
             return;
         }
+
+        var settings = GetKnobSettings(activeKnob);
+        if (settings.Mode == KnobRotationMode.Click)
+        {
+            HandleClickModeInput(settings);
+            return;
+        }
+
+        clickRepeatTimerSeconds = 0f;
+        lastClickDirection = 0f;
 
         // convert input into degrees for this frame
         var angleDelta = turnDirection * settings.TurnSpeedDegreesPerSecond * Time.deltaTime;
@@ -198,6 +213,7 @@ public class RadioController : MonoBehaviour
 
         // set active knob from whichever target was clicked
         activeKnob = knobId;
+        isLeverPulling = false;
 
         // show close-up and enable input loop
         isCloseUpOpen = true;
@@ -207,6 +223,22 @@ public class RadioController : MonoBehaviour
         SyncAllVisuals();
 
         // highlight whichever knob is active in close-up
+        UpdateCloseUpSelectionVisuals();
+    }
+
+    public void PullLeverInteractively()
+    {
+        if (closeUpPanel == null)
+        {
+            Debug.LogError("RadioController: closeUpPanel is not assigned");
+            return;
+        }
+
+        isCloseUpOpen = true;
+        closeUpPanel.SetActive(true);
+        isLeverPulling = true;
+
+        SyncAllVisuals();
         UpdateCloseUpSelectionVisuals();
     }
 
@@ -248,6 +280,8 @@ public class RadioController : MonoBehaviour
 
         leftAngleDegrees = ApplyRotationMode(leftRawAngleDegrees, leftKnobSettings);
         rightAngleDegrees = ApplyRotationMode(rightRawAngleDegrees, rightKnobSettings);
+        isLeverPulling = false;
+        RestoreLeverToStart();
 
         SyncAllVisuals();
     }
@@ -379,22 +413,51 @@ public class RadioController : MonoBehaviour
             leftCloseUpKnobImage,
             leftCloseUpKnobDefaultSprite,
             closeUpKnobSelectedSprite,
-            isCloseUpOpen && activeKnob == RadioKnobId.Left);
+            isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Left);
 
         ApplyCloseUpKnobSpriteSelection(
             rightCloseUpKnobImage,
             rightCloseUpKnobDefaultSprite,
             closeUpKnobSelectedSprite,
-            isCloseUpOpen && activeKnob == RadioKnobId.Right);
+            isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Right);
 
         if (leftCloseUpKnobOutline != null)
         {
-            leftCloseUpKnobOutline.enabled = !leftUsesSpriteSwap && isCloseUpOpen && activeKnob == RadioKnobId.Left;
+            leftCloseUpKnobOutline.enabled = !leftUsesSpriteSwap && isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Left;
         }
 
         if (rightCloseUpKnobOutline != null)
         {
-            rightCloseUpKnobOutline.enabled = !rightUsesSpriteSwap && isCloseUpOpen && activeKnob == RadioKnobId.Right;
+            rightCloseUpKnobOutline.enabled = !rightUsesSpriteSwap && isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Right;
+        }
+    }
+
+    private void UpdateLeverPullAnimation()
+    {
+        if (!isLeverPulling)
+        {
+            return;
+        }
+
+        if (closeUpLever == null || closeUpLeverEndpoint == null)
+        {
+            isLeverPulling = false;
+            return;
+        }
+
+        var duration = Mathf.Max(0.0001f, leverPullDurationSeconds);
+        var nextPosition = Vector2.MoveTowards(
+            closeUpLever.anchoredPosition,
+            closeUpLeverEndpoint.anchoredPosition,
+            Vector2.Distance(closeUpLeverStartAnchoredPosition, closeUpLeverEndpoint.anchoredPosition) * (Time.deltaTime / duration));
+
+        closeUpLever.anchoredPosition = nextPosition;
+
+        if (Vector2.Distance(closeUpLever.anchoredPosition, closeUpLeverEndpoint.anchoredPosition) <= 0.001f)
+        {
+            closeUpLever.anchoredPosition = closeUpLeverEndpoint.anchoredPosition;
+            isLeverPulling = false;
+            LeverThresholdReached?.Invoke();
         }
     }
 
@@ -428,6 +491,8 @@ public class RadioController : MonoBehaviour
         {
             rightKnobSettings.Validate();
         }
+
+        leverPullDurationSeconds = Mathf.Max(0.01f, leverPullDurationSeconds);
     }
 
     // stores current close-up image sprites as default non-selected visuals
@@ -456,6 +521,22 @@ public class RadioController : MonoBehaviour
         }
 
         targetImage.sprite = isSelected ? selectedSprite : defaultSprite;
+    }
+
+    private void CacheLeverStartPosition()
+    {
+        if (closeUpLever != null)
+        {
+            closeUpLeverStartAnchoredPosition = closeUpLever.anchoredPosition;
+        }
+    }
+
+    private void RestoreLeverToStart()
+    {
+        if (closeUpLever != null)
+        {
+            closeUpLever.anchoredPosition = closeUpLeverStartAnchoredPosition;
+        }
     }
 
     // click-mode knobs move by discrete detents 
