@@ -18,12 +18,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
     public event Action RightKnobTuned;
     // raised when player pulls lever and translated text is shown
     public event Action LeverPulled;
+    // raised when the lever is pulled and the post-pull presentation should begin
+    public event Action LeverSequenceStarted;
 
     private enum PuzzleState
     {
         Scan,
         Tune,
         DecodedAwaitLever,
+        LeverSequencePlaying,
         Solved
     }
 
@@ -32,6 +35,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private Button leverButton;
     [SerializeField] private TMP_Text hintText;
     [SerializeField] private TMP_Text subtitleText;
+
+    [Header("Close-Up Cursor")]
+    [SerializeField] private RectTransform closeUpCursor;
+    [SerializeField] private RectTransform[] channelCursorTargets;
+
+    [Header("Close-Up Clearance Pointer")]
+    [SerializeField] private RectTransform closeUpClearancePointer;
+    [SerializeField] private RectTransform clearancePointerStartTarget;
+    [SerializeField] private RectTransform clearancePointerEndTarget;
 
     [Header("Audio Sources")]
     [SerializeField] private AudioSource staticLoopSource;
@@ -79,6 +91,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     private float holdTimerSeconds;
     private bool isInTuneZone;
     private float cachedRightKnobNormalized;
+    private float clearancePointerBaselineNormalized;
     private bool hasStartedAudioLoops;
     // prevents repeated event spam while player stays on true channel
     private bool hasBroadcastTrueChannelFound;
@@ -91,6 +104,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
         if (radioController != null)
         {
             radioController.KnobChanged += HandleKnobChanged;
+            radioController.LeverThresholdReached += HandleLeverThresholdReached;
         }
     }
 
@@ -100,6 +114,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
         if (radioController != null)
         {
             radioController.KnobChanged -= HandleKnobChanged;
+            radioController.LeverThresholdReached -= HandleLeverThresholdReached;
         }
 
         StopAudioLoops();
@@ -148,7 +163,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     }
 
     // called by pull lever button
-    // applies translated text and exits close-up
+    // starts the post-pull sequence and exits close-up
     public void PullLever()
     {
         if (puzzleState != PuzzleState.DecodedAwaitLever)
@@ -156,9 +171,40 @@ public class RadioTutorialPuzzle : MonoBehaviour
             return;
         }
 
+        puzzleState = PuzzleState.LeverSequencePlaying;
+        StopAudioLoops();
+
+        if (radioController != null && radioController.IsCloseUpOpen)
+        {
+            radioController.CloseCloseUp();
+        }
+
+        LeverSequenceStarted?.Invoke();
+    }
+
+    // hides translated subtitle text object
+    public void HideSubtitleText()
+    {
+        if (subtitleText != null)
+        {
+            subtitleText.gameObject.SetActive(false);
+        }
+    }
+
+    public bool CanPullLever()
+    {
+        return puzzleState == PuzzleState.DecodedAwaitLever;
+    }
+
+    public void CompleteLeverSequence()
+    {
+        if (puzzleState != PuzzleState.LeverSequencePlaying)
+        {
+            return;
+        }
+
         puzzleState = PuzzleState.Solved;
         SetHint(solvedHintText);
-        StopAudioLoops();
 
         if (subtitleText != null)
         {
@@ -170,21 +216,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
             Debug.LogWarning("RadioTutorialPuzzle: subtitleText is not assigned.");
         }
 
-        if (radioController != null && radioController.IsCloseUpOpen)
-        {
-            radioController.CloseCloseUp();
-        }
-
         LeverPulled?.Invoke();
-    }
-
-    // hides translated subtitle text object
-    public void HideSubtitleText()
-    {
-        if (subtitleText != null)
-        {
-            subtitleText.gameObject.SetActive(false);
-        }
     }
 
     // validates required references and clamps config
@@ -200,8 +232,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         if (leverButton == null)
         {
-            Debug.LogError("RadioTutorialPuzzle: leverButton is not assigned.");
-            isValid = false;
+            Debug.LogWarning("RadioTutorialPuzzle: leverButton is not assigned. Visual lever interaction will still work.");
         }
 
         if (staticLoopSource == null)
@@ -222,11 +253,54 @@ public class RadioTutorialPuzzle : MonoBehaviour
             isValid = false;
         }
 
+        if (closeUpCursor == null)
+        {
+            Debug.LogError("RadioTutorialPuzzle: closeUpCursor is not assigned.");
+            isValid = false;
+        }
+
         if (channelCount < 1)
         {
             Debug.LogWarning("RadioTutorialPuzzle: channelCount must be at least 1. Setting to 1.");
             channelCount = 1;
         }
+
+        if (channelCursorTargets == null || channelCursorTargets.Length != channelCount)
+        {
+            Debug.LogError($"RadioTutorialPuzzle: channelCursorTargets must contain exactly {channelCount} entries.");
+            isValid = false;
+        }
+        else
+        {
+            for (var i = 0; i < channelCursorTargets.Length; i++)
+            {
+                if (channelCursorTargets[i] == null)
+                {
+                    Debug.LogError($"RadioTutorialPuzzle: channelCursorTargets[{i}] is not assigned.");
+                    isValid = false;
+                }
+            }
+        }
+
+        if (closeUpClearancePointer == null)
+        {
+            Debug.LogError("RadioTutorialPuzzle: closeUpClearancePointer is not assigned.");
+            isValid = false;
+        }
+
+        if (clearancePointerStartTarget == null)
+        {
+            Debug.LogError("RadioTutorialPuzzle: clearancePointerStartTarget is not assigned.");
+            isValid = false;
+        }
+
+        if (clearancePointerEndTarget == null)
+        {
+            Debug.LogError("RadioTutorialPuzzle: clearancePointerEndTarget is not assigned.");
+            isValid = false;
+        }
+
+        CacheClearancePointerBaseline();
 
         tuningZoneHalfWidth = Mathf.Max(0.0001f, tuningZoneHalfWidth);
         requiredHoldSeconds = Mathf.Max(0f, requiredHoldSeconds);
@@ -295,6 +369,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         SetHint(scanHintText);
         ApplyDecoyAudioMix();
+        UpdateCloseUpClearancePointerPosition();
 
         if (radioController != null)
         {
@@ -334,6 +409,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
         currentChannelIndex = nextChannelIndex;
         holdTimerSeconds = 0f;
         isInTuneZone = false;
+        UpdateCloseUpCursorPosition();
 
         if (IsOnTrueChannel())
         {
@@ -358,6 +434,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     private void HandleRightKnobChanged(float normalized)
     {
         cachedRightKnobNormalized = Mathf.Repeat(normalized, 1f);
+        UpdateCloseUpClearancePointerPosition();
 
         if (puzzleState != PuzzleState.Tune || !IsOnTrueChannel())
         {
@@ -410,6 +487,11 @@ public class RadioTutorialPuzzle : MonoBehaviour
         SetHint(decodedHintText);
     }
 
+    private void HandleLeverThresholdReached()
+    {
+        PullLever();
+    }
+
     // decoy channel mix: static only, no choir cue
     private void ApplyDecoyAudioMix()
     {
@@ -455,6 +537,65 @@ public class RadioTutorialPuzzle : MonoBehaviour
         var wrapped = Mathf.Repeat(normalized, 1f);
         var index = Mathf.FloorToInt(wrapped * channelCount);
         return Mathf.Clamp(index, 0, channelCount - 1);
+    }
+
+    private void UpdateCloseUpCursorPosition()
+    {
+        if (closeUpCursor == null || channelCursorTargets == null)
+        {
+            return;
+        }
+
+        if (currentChannelIndex < 0 || currentChannelIndex >= channelCursorTargets.Length)
+        {
+            return;
+        }
+
+        var mirroredIndex = (channelCursorTargets.Length - currentChannelIndex) % channelCursorTargets.Length;
+        var target = channelCursorTargets[mirroredIndex];
+        if (target == null)
+        {
+            return;
+        }
+
+        closeUpCursor.anchoredPosition = target.anchoredPosition;
+    }
+
+    private void UpdateCloseUpClearancePointerPosition()
+    {
+        if (closeUpClearancePointer == null || clearancePointerStartTarget == null || clearancePointerEndTarget == null)
+        {
+            return;
+        }
+
+        var pointerNormalized = Mathf.Repeat(clearancePointerBaselineNormalized - cachedRightKnobNormalized, 1f);
+        closeUpClearancePointer.anchoredPosition = Vector2.Lerp(
+            clearancePointerStartTarget.anchoredPosition,
+            clearancePointerEndTarget.anchoredPosition,
+            pointerNormalized);
+    }
+
+    private void CacheClearancePointerBaseline()
+    {
+        if (closeUpClearancePointer == null || clearancePointerStartTarget == null || clearancePointerEndTarget == null)
+        {
+            clearancePointerBaselineNormalized = 0f;
+            return;
+        }
+
+        var start = clearancePointerStartTarget.anchoredPosition;
+        var end = clearancePointerEndTarget.anchoredPosition;
+        var segment = end - start;
+        var lengthSquared = segment.sqrMagnitude;
+
+        if (lengthSquared <= Mathf.Epsilon)
+        {
+            clearancePointerBaselineNormalized = 0f;
+            return;
+        }
+
+        var pointerOffset = closeUpClearancePointer.anchoredPosition - start;
+        clearancePointerBaselineNormalized = Mathf.Clamp01(Vector2.Dot(pointerOffset, segment) / lengthSquared);
     }
 
     // shortest wraparound distance in 0..1 range
