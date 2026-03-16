@@ -84,7 +84,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private string decodedHintText = "Decoded. Pull lever to translate.";
     [SerializeField] private string solvedHintText = "Translation complete.";
     [FormerlySerializedAs("solvedSubtitleText")]
-    [SerializeField] [TextArea] private string translatedMessageText = "[TRANSLATED MESSAGE]";
+    [SerializeField] [TextArea] public string translatedMessageText = "[TRANSLATED MESSAGE]";
 
     private PuzzleState puzzleState;
     private int currentChannelIndex = -1;

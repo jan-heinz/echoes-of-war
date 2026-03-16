@@ -2042,7 +2042,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 659512992}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7ea0ff911f744e69a36bf03e5babd5d, type: 3}
   m_Name: 
@@ -2083,8 +2083,7 @@ MonoBehaviour:
   tuneHintText: Tune with right knob.
   decodedHintText: Decoded. Pull lever to translate.
   solvedHintText: Translation complete.
-  translatedMessageText: We are sending our troops on foot from the eastern forest
-    to attack.
+  translatedMessageText: Bj ibwf luxskj cp alliance amxl wkh esbhpot gtj xnwjsx.
 --- !u!114 &659512996
 MonoBehaviour:
   m_ObjectHideFlags: 0
