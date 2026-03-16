@@ -1,2 +1,22 @@
 fileFormatVersion: 2
 guid: b4a553b923ad14a079911a8c4a286e51
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - compiledInkJson: {instanceID: 0}
+  - radioTutorialPuzzle: {instanceID: 0}
+  - dialoguePanel: {instanceID: 0}
+  - dialogueText: {instanceID: 0}
+  - speakerNameText: {instanceID: 0}
+  - speakerPortraitImage: {instanceID: 0}
+  - dialogueClickTarget: {instanceID: 0}
+  - newspaperPopup: {instanceID: 0}
+  - dialogueVoiceAudioSource: {instanceID: 0}
+  - choicesContainer: {instanceID: 0}
+  - choiceButtonPrefab: {fileID: 4023961962736079748, guid: ea8a31232a50daf4fad61b4ba45d5567, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

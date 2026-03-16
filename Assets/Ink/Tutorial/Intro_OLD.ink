@@ -1,6 +1,6 @@
 === start ===
 Welcome to the Thorns Decoding Team! My name is Fern, and I'll be your commanding officer. Click anywhere on this dialogue box to continue. # speaker:fern
--> briefing
+-> END
 
 === briefing ===
 If you’re all set, I can walk you through using the decoding console, which will make up a large part of your daily work here.
@@ -19,8 +19,22 @@ Now let's move onto the right knob. This is where you are going to enhance the c
 Perfect, your right knob tuning is on target. # speaker:fern
 Pull the level to decode the message.
 -> END
+
+=== lever_pulled ===
+Excellent. The translated message is now visible. # speaker:fern
+Review the key details and jot them down in your logbook. Don't worry if your handwriting is sloppy, no one will see but you. *WIP FEATURE* 
+
+Now, if this were a real message, you would report to an offier with what you found out. *WIP* #speaker: fern
+
+At this point, the officer would ask for your recommendation for the course of action you recommend *WIP* #speaker: fern
+
+# ui:hide_subtitles
+After you make your recommendation, you will receive a copy of the latest edition of the Golden Rose Gazette if you want to check out the current state of the war. # speaker: fern
+
+# ui:display_newspaper
+ -> END
  
- ===lever_pulled==
+===Report===
 Now, if this were a real message, you would report to an offier with what you found out. 
 + An attack is coming from the eastern forest. -> Where
 + The enemy seems to be currently moving towards us. -> When

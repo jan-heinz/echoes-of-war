@@ -57,8 +57,13 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private AudioSource dialogueVoiceAudioSource;
     [SerializeField] private bool hidePanelWhenDone = true;
 
+    [Header("Choices")]
+    [SerializeField] private Button choiceButtonPrefab; 
+    [SerializeField] private Transform choiceContainer; 
+
     [Header("Speakers")]
     [SerializeField] private SpeakerVisual[] speakers;
+
 
     private Story story;
     private readonly Queue<string> queuedKnots = new Queue<string>();
@@ -282,11 +287,18 @@ public class InkDialogue : MonoBehaviour
             return;
         }
 
-        if (TryEnterNextQueuedKnot())
+        if (story.currentChoices.Count > 0) 
+        {
+            ShowChoices();
+            return;
+        }       
+
+        /* if (TryEnterNextQueuedKnot())
         {
             AdvanceDialogue();
             return;
         }
+        */
 
         dialogueText.text = string.Empty;
         dialogueClickTarget.interactable = false;
@@ -310,9 +322,13 @@ public class InkDialogue : MonoBehaviour
             return;
         }
 
-        story = new Story(compiledInkJson.text);
-        queuedKnots.Clear();
-        BuildSpeakerLookup();
+        if (story == null)
+        {
+            story = new Story(compiledInkJson.text);
+            CacheQueuedKnots();
+            BuildSpeakerLookup();
+        }       
+
         isPausedForPopup = false;
         StopLineReveal();
 
@@ -478,6 +494,7 @@ public class InkDialogue : MonoBehaviour
         {
             dialoguePanel.SetActive(shouldRestoreDialoguePanel);
         }
+
 
         if (dialogueClickTarget != null)
         {
@@ -649,7 +666,7 @@ public class InkDialogue : MonoBehaviour
     }
 
     // enters the next queued knot
-    private bool TryEnterNextQueuedKnot()
+     private bool TryEnterNextQueuedKnot()
     {
         while (queuedKnots.Count > 0)
         {
@@ -661,6 +678,7 @@ public class InkDialogue : MonoBehaviour
 
         return false;
     }
+        
 
     // tries to jump to a knot path in current story
     private bool TryEnterKnot(string knotName)
@@ -681,4 +699,42 @@ public class InkDialogue : MonoBehaviour
             return false;
         }
     }
+
+        private void ShowChoices()
+    {
+        dialogueClickTarget.interactable = false;
+
+        // Clear old buttons
+        foreach (Transform child in choiceContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        for (int i = 0; i < story.currentChoices.Count; i++)
+        {
+            var choice = story.currentChoices[i];
+            var button = Instantiate(choiceButtonPrefab, choiceContainer);
+
+            button.GetComponentInChildren<TMP_Text>().text = choice.text;
+            int choiceIndex = i;
+
+            button.onClick.AddListener(() =>
+            {
+                ChooseInkChoice(choiceIndex);
+            });
+        }
+    }
+        private void ChooseInkChoice(int index)
+    {
+        foreach (Transform child in choiceContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        dialogueClickTarget.interactable = true;
+
+        story.ChooseChoiceIndex(index);
+        AdvanceDialogue();
+    }
+
 }
