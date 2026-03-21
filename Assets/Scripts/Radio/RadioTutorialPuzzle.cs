@@ -481,7 +481,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         if (successAudioSource != null && successBingClip != null)
         {
-            successAudioSource.PlayOneShot(successBingClip);
+            successAudioSource.PlayOneShot(successBingClip, ClipVolumeRegistry.ScaleVolume(successBingClip, 1f));
         }
 
         SetHint(decodedHintText);
@@ -497,12 +497,12 @@ public class RadioTutorialPuzzle : MonoBehaviour
     {
         if (staticLoopSource != null)
         {
-            staticLoopSource.volume = decoyStaticVolume;
+            staticLoopSource.volume = ClipVolumeRegistry.ScaleVolume(staticClip, decoyStaticVolume);
         }
 
         if (choirLoopSource != null)
         {
-            choirLoopSource.volume = 0f;
+            choirLoopSource.volume = ClipVolumeRegistry.ScaleVolume(choirClip, 0f);
         }
     }
 
@@ -516,12 +516,12 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         if (staticLoopSource != null)
         {
-            staticLoopSource.volume = Mathf.Lerp(trueUntunedStaticVolume, 0f, blend);
+            staticLoopSource.volume = ClipVolumeRegistry.ScaleVolume(staticClip, Mathf.Lerp(trueUntunedStaticVolume, 0f, blend));
         }
 
         if (choirLoopSource != null)
         {
-            choirLoopSource.volume = Mathf.Lerp(trueUntunedChoirVolume, 1f, blend);
+            choirLoopSource.volume = ClipVolumeRegistry.ScaleVolume(choirClip, Mathf.Lerp(trueUntunedChoirVolume, 1f, blend));
         }
     }
 

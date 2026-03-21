@@ -40,6 +40,6 @@ public class ClickSFX : MonoBehaviour
             return;
         }
         
-        clickAudioSource.PlayOneShot(clickClip, clickVolume);
+        clickAudioSource.PlayOneShot(clickClip, ClipVolumeRegistry.ScaleVolume(clickClip, clickVolume));
     }
 }

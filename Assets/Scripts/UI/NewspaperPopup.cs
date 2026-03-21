@@ -101,6 +101,6 @@ public class NewspaperPopup : MonoBehaviour
             return;
         }
 
-        rustleAudioSource.PlayOneShot(clip, rustleVolume);
+        rustleAudioSource.PlayOneShot(clip, ClipVolumeRegistry.ScaleVolume(clip, rustleVolume));
     }
 }

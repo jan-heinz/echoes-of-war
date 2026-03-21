@@ -49,6 +49,6 @@ public class RadioKnobClickTarget : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        clickAudioSource.PlayOneShot(clickClip, clickVolume);
+        clickAudioSource.PlayOneShot(clickClip, ClipVolumeRegistry.ScaleVolume(clickClip, clickVolume));
     }
 }
