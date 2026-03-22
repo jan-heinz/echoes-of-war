@@ -266,7 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f6a4b50079614e13972918b01958819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadSceneOnClick
-  sceneName: Office v2
+  sceneName: Transition
   loadDelaySeconds: 0.08
 --- !u!114 &8290862
 MonoBehaviour:
@@ -1880,6 +1880,7 @@ GameObject:
   - component: {fileID: 1865342408}
   - component: {fileID: 1865342410}
   - component: {fileID: 1865342407}
+  - component: {fileID: 1865342411}
   m_Layer: 5
   m_Name: Settings
   m_TagString: Untagged
@@ -2015,6 +2016,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LoadSceneOnClick
   sceneName: Settings
   loadDelaySeconds: 0.08
+--- !u!114 &1865342411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865342405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c25d6ea220841fd9121bd11496bd3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClickSFX
+  clickAudioSource: {fileID: 172780568}
+  clickClip: {fileID: 8300000, guid: cc122f1ad684543298d85ebe22953219, type: 3}
+  clickVolume: 1
 --- !u!1 &1866380315
 GameObject:
   m_ObjectHideFlags: 0
