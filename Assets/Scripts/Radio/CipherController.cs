@@ -40,6 +40,7 @@ public class CipherController : MonoBehaviour
     private List<CipherColor> selectedColors = new List<CipherColor>();
     private int cursorIndex = 0;
     private bool solved = false;
+    private bool started = false;
 
     private float heldTimer = 0f;
     private string lastKey = "";
@@ -72,8 +73,12 @@ public class CipherController : MonoBehaviour
 
     void Update()
     {
-        if (solved) return;
-        HandleInput();
+         if (Input.GetKeyDown(KeyCode.Space) && !started)
+        StartPuzzle();
+
+    if (solved) return;
+    if (!started) return;
+    HandleInput();
     }
 
     // ── Input ────────────────────────────────────────────────────────────
@@ -173,6 +178,25 @@ public class CipherController : MonoBehaviour
         var color = selectedColors[cursorIndex];
         colorLabel.text  = color.ToString();
         colorLabel.color = ColorMap[color];
+    }
+
+    // ── Public API ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Call this from your puzzle manager when it's time to show and start the cipher.
+    /// </summary>
+    public void StartPuzzle()
+    {
+        gameObject.SetActive(true);
+        started = true;
+    }
+
+    /// <summary>
+    /// Call this to hide the cipher without solving it (e.g. returning to a menu).
+    /// </summary>
+    public void HidePuzzle()
+    {
+        gameObject.SetActive(false);
     }
 
     // ── Win Condition ────────────────────────────────────────────────────
