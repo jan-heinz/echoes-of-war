@@ -65,18 +65,22 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private float tuningTargetNormalized = 0.38f;
     [Tooltip("How far from the tuning target still counts as 'in tune' (normalized range).")]
     [SerializeField] private float tuningZoneHalfWidth = 0.08f;
+    [Tooltip("How far from the tuning target audio feedback still reacts before the knob is fully in tune.")]
+    [SerializeField] private float feedbackZoneHalfWidth = 0.22f;
     [Tooltip("How long the right knob must stay in tune before decode succeeds.")]
     [SerializeField] private float requiredHoldSeconds = 1.0f;
+    [Tooltip("How long the player can drift out of tune before tuning progress resets.")]
+    [SerializeField] private float outOfTuneGraceSeconds = 0.15f;
 
     [Header("Audio Mix")]
-    [Tooltip("Static volume used on incorrect channels.")]
-    [SerializeField] private float decoyStaticVolume = 0.8f;
-    [Tooltip("Static volume on the true channel before tuning improves clarity.")]
-    [SerializeField] private float trueUntunedStaticVolume = 0.7f;
-    [Tooltip("Choir cue volume on the true channel before tuning improves clarity.")]
-    [SerializeField] private float trueUntunedChoirVolume = 0.35f;
-    [Tooltip("Shape of tuning blend: 1 = linear, >1 = slower start, <1 = faster start.")]
-    [SerializeField] private float blendCurvePower = 1f;
+    [Tooltip("Static volume on incorrect channels while scanning with the left knob.")]
+    [SerializeField] private float decoyStaticVolume = 1.0f;
+    [Tooltip("Static volume before tuning improves clarity.")]
+    [SerializeField] private float trueUntunedStaticVolume = 0.8f;
+    [Tooltip("Static volume floor on the true channel once the first half of tuning feedback is complete.")]
+    [SerializeField] private float tunedStaticFloorVolume = 0.2f;
+    [Tooltip("Choir preview volume on the true channel before the right knob reaches the choir ramp phase.")]
+    [SerializeField] private float trueChannelPreviewChoirVolume = 0.08f;
 
     [Header("Text")]
     [SerializeField] private string scanHintText = "Scan channels with left knob.";
@@ -89,6 +93,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     private PuzzleState puzzleState;
     private int currentChannelIndex = -1;
     private float holdTimerSeconds;
+    private float outOfTuneTimerSeconds;
     private bool isInTuneZone;
     private float cachedRightKnobNormalized;
     private float clearancePointerBaselineNormalized;
@@ -150,10 +155,15 @@ public class RadioTutorialPuzzle : MonoBehaviour
         if (isInTuneZone)
         {
             holdTimerSeconds += Time.deltaTime;
+            outOfTuneTimerSeconds = 0f;
         }
         else
         {
-            holdTimerSeconds = 0f;
+            outOfTuneTimerSeconds += Time.deltaTime;
+            if (outOfTuneTimerSeconds > outOfTuneGraceSeconds)
+            {
+                holdTimerSeconds = 0f;
+            }
         }
 
         if (holdTimerSeconds >= requiredHoldSeconds)
@@ -303,12 +313,14 @@ public class RadioTutorialPuzzle : MonoBehaviour
         CacheClearancePointerBaseline();
 
         tuningZoneHalfWidth = Mathf.Max(0.0001f, tuningZoneHalfWidth);
+        feedbackZoneHalfWidth = Mathf.Max(tuningZoneHalfWidth, feedbackZoneHalfWidth);
         requiredHoldSeconds = Mathf.Max(0f, requiredHoldSeconds);
+        outOfTuneGraceSeconds = Mathf.Max(0f, outOfTuneGraceSeconds);
 
         decoyStaticVolume = Mathf.Clamp01(decoyStaticVolume);
         trueUntunedStaticVolume = Mathf.Clamp01(trueUntunedStaticVolume);
-        trueUntunedChoirVolume = Mathf.Clamp01(trueUntunedChoirVolume);
-        blendCurvePower = Mathf.Max(0.01f, blendCurvePower);
+        tunedStaticFloorVolume = Mathf.Clamp(tunedStaticFloorVolume, 0f, trueUntunedStaticVolume);
+        trueChannelPreviewChoirVolume = Mathf.Clamp01(trueChannelPreviewChoirVolume);
 
         tuningTargetNormalized = Mathf.Repeat(tuningTargetNormalized, 1f);
         trueChannelIndex = Mathf.Clamp(trueChannelIndex, 0, channelCount - 1);
@@ -349,6 +361,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
         StopAudioLoops();
         puzzleState = PuzzleState.Scan;
         holdTimerSeconds = 0f;
+        outOfTuneTimerSeconds = 0f;
         isInTuneZone = false;
         hasBroadcastTrueChannelFound = false;
         hasBroadcastRightKnobTuned = false;
@@ -408,6 +421,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         currentChannelIndex = nextChannelIndex;
         holdTimerSeconds = 0f;
+        outOfTuneTimerSeconds = 0f;
         isInTuneZone = false;
         UpdateCloseUpCursorPosition();
 
@@ -448,7 +462,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
     private void EvaluateTrueChannelTuning()
     {
         var distance = CircularDistance01(cachedRightKnobNormalized, tuningTargetNormalized);
-        var clarity = Mathf.Clamp01(1f - (distance / tuningZoneHalfWidth));
+        var clarity = Mathf.Clamp01(1f - (distance / feedbackZoneHalfWidth));
 
         ApplyTrueChannelAudioMix(clarity);
         isInTuneZone = distance <= tuningZoneHalfWidth;
@@ -512,16 +526,22 @@ public class RadioTutorialPuzzle : MonoBehaviour
     private void ApplyTrueChannelAudioMix(float clarity)
     {
         var clampedClarity = Mathf.Clamp01(clarity);
-        var blend = Mathf.Pow(clampedClarity, blendCurvePower);
+        const float phaseBoundary = 0.5f;
+        var staticBlend = Mathf.Clamp01(clampedClarity / phaseBoundary);
+        var choirBlend = Mathf.InverseLerp(phaseBoundary, 1f, clampedClarity);
 
         if (staticLoopSource != null)
         {
-            staticLoopSource.volume = ClipVolumeRegistry.ScaleVolume(staticClip, Mathf.Lerp(trueUntunedStaticVolume, 0f, blend));
+            staticLoopSource.volume = ClipVolumeRegistry.ScaleVolume(
+                staticClip,
+                Mathf.Lerp(trueUntunedStaticVolume, tunedStaticFloorVolume, staticBlend));
         }
 
         if (choirLoopSource != null)
         {
-            choirLoopSource.volume = ClipVolumeRegistry.ScaleVolume(choirClip, Mathf.Lerp(trueUntunedChoirVolume, 1f, blend));
+            choirLoopSource.volume = ClipVolumeRegistry.ScaleVolume(
+                choirClip,
+                Mathf.Lerp(trueChannelPreviewChoirVolume, 1f, choirBlend));
         }
     }
 
