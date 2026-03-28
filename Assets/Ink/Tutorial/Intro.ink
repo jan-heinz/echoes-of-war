@@ -21,7 +21,7 @@ Pull the level to decode the message.
 -> END
  
  ===lever_pulled==
-Now, if this were a real message, you would report to an offier with what you found out. 
+Now, if this were a real message, you would report to an offier with what you found out. # speaker:fern
 + [An attack is coming from the eastern forest.] -> Where
 + [The enemy seems to be currently moving towards us.] -> When
 + [It’s a land attack, so likely Unicorn forces.] -> How
