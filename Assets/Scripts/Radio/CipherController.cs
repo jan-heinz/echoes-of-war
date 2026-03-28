@@ -169,7 +169,7 @@ public class CipherController : MonoBehaviour
            if (selectedColors[cursorIndex] == CipherColor.Blue)
             {
                 first = true;
-                inkDialogue.StartDialogueAtKnot("Unicorn_FirstWord");
+                inkDialogue.StartDialogueAtKnot("Unicorn_First");
             }
         } 
     }
@@ -234,7 +234,7 @@ public class CipherController : MonoBehaviour
         if (solvedPanel != null)
             solvedPanel.SetActive(true);
         
-        inkDialogue.StartDialogueAtKnot("Unicorn_Solved");
+        inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
         messagePanel.SetActive(false);
     }
