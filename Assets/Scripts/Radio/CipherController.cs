@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using TMPro;
 using UnicornCipher;
 
@@ -9,22 +10,26 @@ using UnicornCipher;
 ///
 /// Scene setup required:
 ///   - One TMP text object per word (assign in Inspector via WordLabels list)
-///   - One TMP text object for the color indicator (ColorLabel)
 ///   - A RectTransform for the unicorn horn sprite (HornCursor) — it will slide under the selected word
 /// </summary>
 public class CipherController : MonoBehaviour
 {
+    [Tooltip("Optional: assign a panel to show/hide with the puzzle.")]
+    public GameObject messagePanel;
+
     [Header("Word Display")]
     [Tooltip("One TMP label per word, in sentence order (10 total).")]
     public List<TextMeshProUGUI> wordLabels;
 
     [Header("Color Indicator")]
-    [Tooltip("Displays the currently selected color name for the active word.")]
+    [Tooltip("Optional: displays the currently selected color name for the active word.")]
     public TextMeshProUGUI colorLabel;
 
     [Header("Horn Cursor")]
     [Tooltip("RectTransform of the unicorn horn sprite. Moves under the active word.")]
     public RectTransform hornCursor;
+    [Tooltip("Optional: assign the horn sprite here to show/hide it with the puzzle.")]
+    public GameObject hornSprite;
 
     [Tooltip("How far below each word label the horn sits (negative = below).")]
     public float hornYOffset = -40f;
@@ -60,7 +65,8 @@ public class CipherController : MonoBehaviour
     // ── Unity Lifecycle ─────────────────────────────────────────────────
     void Start()
     {
-        // Initialise each word to its starting color
+        StartPuzzle();
+
         foreach (var word in UnicornCipherPuzzle.Words)
             selectedColors.Add(word.StartingColor);
 
@@ -73,27 +79,24 @@ public class CipherController : MonoBehaviour
 
     void Update()
     {
-         if (Input.GetKeyDown(KeyCode.Space) && !started)
-        StartPuzzle();
-
-    if (solved) return;
-    if (!started) return;
-    HandleInput();
+        if (solved) return;
+        if (!started) return;
+        HandleInput();
     }
 
     // ── Input ────────────────────────────────────────────────────────────
     void HandleInput()
     {
-        // A / D  →  move cursor left / right
-        // W / S  →  cycle color up / down
+        var kb = Keyboard.current;
 
-        if (Input.GetKeyDown(KeyCode.A))      { heldTimer = 0f; lastKey = "A"; MoveCursor(-1); }
-        else if (Input.GetKeyDown(KeyCode.D)) { heldTimer = 0f; lastKey = "D"; MoveCursor(1);  }
-        else if (Input.GetKeyDown(KeyCode.W)) { heldTimer = 0f; lastKey = "W"; CycleColor(-1); }
-        else if (Input.GetKeyDown(KeyCode.S)) { heldTimer = 0f; lastKey = "S"; CycleColor(1);  }
+        // Fresh key presses
+        if (kb.aKey.wasPressedThisFrame)      { heldTimer = 0f; lastKey = "A"; MoveCursor(-1); }
+        else if (kb.dKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "D"; MoveCursor(1);  }
+        else if (kb.wKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "W"; CycleColor(-1); }
+        else if (kb.sKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "S"; CycleColor(1);  }
 
         // Key-held repeat
-        if (lastKey != "" && Input.GetKey(KeyCodeFromString(lastKey)))
+        if (lastKey != "" && IsKeyHeld(lastKey))
         {
             heldTimer += Time.deltaTime;
             if (heldTimer >= inputRepeatDelay)
@@ -109,7 +112,8 @@ public class CipherController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyUp(KeyCodeFromString(lastKey)))
+        // Clear lastKey when released
+        if (lastKey != "" && !IsKeyHeld(lastKey))
             lastKey = "";
     }
 
@@ -125,7 +129,6 @@ public class CipherController : MonoBehaviour
     {
         cursorIndex = idx;
 
-        // Snap horn under the target word label
         if (hornCursor != null && wordLabels != null && idx < wordLabels.Count)
         {
             var target = wordLabels[idx].rectTransform;
@@ -142,7 +145,6 @@ public class CipherController : MonoBehaviour
     // ── Color Cycling ────────────────────────────────────────────────────
     void CycleColor(int dir)
     {
-        // Clue word is locked — skip cycling
         if (UnicornCipherPuzzle.Words[cursorIndex].IsClueWord) return;
 
         int current = (int)selectedColors[cursorIndex];
@@ -188,6 +190,8 @@ public class CipherController : MonoBehaviour
     public void StartPuzzle()
     {
         gameObject.SetActive(true);
+        if (messagePanel != null) messagePanel.SetActive(true);
+        if (hornSprite != null)   hornSprite.SetActive(true);
         started = true;
     }
 
@@ -216,15 +220,16 @@ public class CipherController : MonoBehaviour
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
-    KeyCode KeyCodeFromString(string k)
+    bool IsKeyHeld(string k)
     {
+        var kb = Keyboard.current;
         switch (k)
         {
-            case "A": return KeyCode.A;
-            case "D": return KeyCode.D;
-            case "W": return KeyCode.W;
-            case "S": return KeyCode.S;
-            default:  return KeyCode.None;
+            case "A": return kb.aKey.isPressed;
+            case "D": return kb.dKey.isPressed;
+            case "W": return kb.wKey.isPressed;
+            case "S": return kb.sKey.isPressed;
+            default:  return false;
         }
     }
 }
