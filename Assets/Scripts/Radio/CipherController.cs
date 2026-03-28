@@ -41,6 +41,9 @@ public class CipherController : MonoBehaviour
     [Tooltip("Object to activate when the puzzle is solved (e.g. a victory panel).")]
     public GameObject solvedPanel;
 
+    [Header("Ink Dialogue")]
+    [SerializeField] private InkDialogue inkDialogue;
+
     // ── Internal State ──────────────────────────────────────────────────
     private List<CipherColor> selectedColors = new List<CipherColor>();
     private int cursorIndex = 0;
@@ -49,6 +52,7 @@ public class CipherController : MonoBehaviour
 
     private float heldTimer = 0f;
     private string lastKey = "";
+    private bool first = false;
 
     // ROYGBIV colors mapped for TMP display
     private static readonly Dictionary<CipherColor, Color> ColorMap = new Dictionary<CipherColor, Color>
@@ -75,6 +79,7 @@ public class CipherController : MonoBehaviour
 
         RefreshAllWords();
         MoveCursorTo(0);
+        inkDialogue.StartDialogueAtKnot("Unicorn_Start");
     }
 
     void Update()
@@ -145,7 +150,10 @@ public class CipherController : MonoBehaviour
     // ── Color Cycling ────────────────────────────────────────────────────
     void CycleColor(int dir)
     {
-        if (UnicornCipherPuzzle.Words[cursorIndex].IsClueWord) return;
+        if (UnicornCipherPuzzle.Words[cursorIndex].IsClueWord) {
+            inkDialogue.StartDialogueAtKnot("Unicorn_Hint");
+            return;
+        }
 
         int current = (int)selectedColors[cursorIndex];
         int next = (current + dir + 7) % 7;
@@ -154,6 +162,16 @@ public class CipherController : MonoBehaviour
         RefreshWord(cursorIndex);
         UpdateColorLabel();
         CheckSolved();
+
+        //Check if first word solved 
+            if (!first)
+        {
+           if (selectedColors[cursorIndex] == CipherColor.Blue)
+            {
+                first = true;
+                inkDialogue.StartDialogueAtKnot("Unicorn_FirstWord");
+            }
+        } 
     }
 
     // ── Display Refresh ──────────────────────────────────────────────────
@@ -215,7 +233,8 @@ public class CipherController : MonoBehaviour
         solved = true;
         if (solvedPanel != null)
             solvedPanel.SetActive(true);
-
+        
+        inkDialogue.StartDialogueAtKnot("Unicorn_Solved");
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
         messagePanel.SetActive(false);
     }
