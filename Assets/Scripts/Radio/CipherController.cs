@@ -217,6 +217,7 @@ public class CipherController : MonoBehaviour
             solvedPanel.SetActive(true);
 
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
+        messagePanel.SetActive(false);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
