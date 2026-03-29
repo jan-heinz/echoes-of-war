@@ -65,7 +65,7 @@ After you make your recommendation, you will receive a copy of the latest editio
 -> END
 
 === Unicorn_Start ===
-Unicorn magic is powerful, and they use it to encrypt their messages with a color cypher. Luckily, the Wings of the Golden Kingdom have discovered how to decrypt the message using a Unicorn Horn. # speaker:fern 
+Unicorn magic is powerful, and they use it to encrypt their messages with a color cypher. Luckily, the Wings of the Golden Kingdom have discovered how to decrypt the message using a unicorn horn. # speaker:fern 
 
  The horn projects the audio message to text and is able to change the color of each word. Notice the clue word which is unencrypted. Just press W or S to change the color of each word and use A or D to shift the horn between words. #speaker:fern
 -> END
@@ -79,7 +79,7 @@ It seems that word is unencrypted already, so no need to mess with the color! #s
 -> END
 
 ===Unicorn_Solve===
-Amazing work! Now you can interpret, report, and strategize as per usual. #speaker:fern
+Oh no! I mean, amazing work, but the message isn't good news. However, now you can interpret, report, and strategize as per usual. #speaker:fern
 -> END
 
 
