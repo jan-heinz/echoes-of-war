@@ -15,7 +15,7 @@ MonoImporter:
   - dialogueVoiceAudioSource: {instanceID: 0}
   - choicesContainer: {instanceID: 0}
   - choiceButtonPrefab: {fileID: 4023961962736079748, guid: ea8a31232a50daf4fad61b4ba45d5567, type: 3}
-  executionOrder: 0
+  executionOrder: 100
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

@@ -64,6 +64,7 @@ public class InkDialogue : MonoBehaviour
     [Header("Speakers")]
     [SerializeField] private SpeakerVisual[] speakers;
 
+    public bool IsDialogueActive => dialoguePanel != null && dialoguePanel.activeSelf;
 
     private Story story;
     private readonly Queue<string> queuedKnots = new Queue<string>();

@@ -84,9 +84,10 @@ public class CipherController : MonoBehaviour
 
     void Update()
     {
-        if (solved) return;
-        if (!started) return;
-        HandleInput();
+    if (solved) return;
+    if (!started) return;
+    if (inkDialogue != null && inkDialogue.IsDialogueActive) return;
+    HandleInput();
     }
 
     // ── Input ────────────────────────────────────────────────────────────

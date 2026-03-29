@@ -579,7 +579,7 @@ MonoBehaviour:
   hornYOffset: 2
   inputRepeatDelay: 0.15
   solvedPanel: {fileID: 1103331237}
-  inkDialogue: {fileID: 678550186}
+  inkDialogue: {fileID: 1865461102}
 --- !u!4 &177920877
 Transform:
   m_ObjectHideFlags: 0
@@ -1296,12 +1296,12 @@ RectTransform:
   - {fileID: 701591364}
   - {fileID: 2067164706}
   - {fileID: 1089530230}
-  - {fileID: 1054353993}
-  - {fileID: 36000224}
-  - {fileID: 1374306528}
-  - {fileID: 1103331242}
   - {fileID: 1944061913}
   - {fileID: 1332137125}
+  - {fileID: 1103331242}
+  - {fileID: 1374306528}
+  - {fileID: 1054353993}
+  - {fileID: 36000224}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2871,11 +2871,13 @@ MonoBehaviour:
   trueChannelIndex: 2
   tuningTargetNormalized: 0.38
   tuningZoneHalfWidth: 0.08
+  feedbackZoneHalfWidth: 0.22
   requiredHoldSeconds: 1
+  outOfTuneGraceSeconds: 0.15
   decoyStaticVolume: 0.6
   trueUntunedStaticVolume: 0.6
-  trueUntunedChoirVolume: 0.55
-  blendCurvePower: 1
+  tunedStaticFloorVolume: 0.2
+  trueChannelPreviewChoirVolume: 0.08
   scanHintText: Scan channels with left knob.
   tuneHintText: Tune with right knob.
   decodedHintText: Decoded. Pull lever to translate.
@@ -2905,71 +2907,6 @@ MonoBehaviour:
   juicerExecuteAnimationClip: {fileID: 7147392025192311743, guid: cfd62358423414c0c88d4a654d4fb509, type: 3}
   juicerExecuteAnimationStateName: 
   fallbackDurationSeconds: 1
---- !u!1 &678550185
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 678550187}
-  - component: {fileID: 678550186}
-  m_Layer: 0
-  m_Name: InkDialogue
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &678550186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 678550185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4a553b923ad14a079911a8c4a286e51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InkDialogue
-  compiledInkJson: {fileID: 4900000, guid: ac150f2dfe49a4625aef221f495ce333, type: 3}
-  startKnot: 
-  nextKnots: []
-  radioTutorialPuzzle: {fileID: 659512995}
-  trueChannelFoundKnot: 
-  rightKnobTunedKnot: 
-  leverPulledKnot: 
-  dialoguePanel: {fileID: 1054353992}
-  dialogueText: {fileID: 1297662386}
-  speakerNameText: {fileID: 81698207}
-  speakerPortraitImage: {fileID: 1008425225}
-  dialogueClickTarget: {fileID: 1054353996}
-  newspaperPopup: {fileID: 0}
-  charactersPerSecond: 45
-  clickCompletesCurrentLine: 1
-  dialogueVoicePitch: 0
-  dialogueVoiceAudioSource: {fileID: 0}
-  hidePanelWhenDone: 1
-  choiceButtonPrefab: {fileID: 4023961962736079748, guid: ea8a31232a50daf4fad61b4ba45d5567, type: 3}
-  choiceContainer: {fileID: 988372745}
-  speakers: []
---- !u!4 &678550187
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 678550185}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.07407, y: 2.42573, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &681991309
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4865,7 +4802,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6126,7 +6063,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -8038,7 +7975,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -8391,4 +8328,3 @@ SceneRoots:
   - {fileID: 313510391}
   - {fileID: 177920877}
   - {fileID: 584601498}
-  - {fileID: 678550187}
