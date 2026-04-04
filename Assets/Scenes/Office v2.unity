@@ -293,7 +293,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 600, y: 1000}
+  m_SizeDelta: {x: 745.85, y: 1012.29}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &36000225
 MonoBehaviour:
@@ -310,19 +310,7 @@ MonoBehaviour:
   popupRoot: {fileID: 36000223}
   bodyText: {fileID: 1415461956}
   closeButton: {fileID: 990798910}
-  newspaperText: "Golden Rose Gazette\nOfficial Newspaper of the Golden Kingdom\n\nThe
-    Golden Kingdom\u2019s Ready to Resonate\n\nFor ages, we believed fairy magic
-    could only thrive in our resonance hub in the Land of Golden Roses. However,
-    when our great explorers, the Wings of the Golden Kingdom, discovered that fairies
-    could safely resonate with points in other territories, a greater truth was revealed:
-    our magic was meant to be shared. \n\nAs the Kingdom moves to resonate with points
-    across the world, other magical creatures have answered with hostility as they
-    guard their hubs and strike our hard-working exploration team. \n\nThese acts
-    have forced the Golden Kingdom into war.\n\nTo protect our colonies and guide
-    our expansion, the Court of the Golden Kingdom has mobilized its great army,
-    the Thorns of the Golden Kingdom, including an innovative decoding team whose
-    magic reveals enemy transmissions and hidden intent.\n\nTheir found knowledge
-    will light our path as the Golden Kingdom flies forward!\n"
+  newspaperText: 
   rustleAudioSource: {fileID: 1237308171}
   rustleClips:
   - {fileID: 8300000, guid: 07474dc8f41774540a1bbccc5379802d, type: 3}
@@ -349,7 +337,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -1467583958497620772, guid: a0c497232ab84414285bb07a8a1b4c94, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1904,23 +1892,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.6154
+      value: 2.463808
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.6154
+      value: 2.463808
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.6154
+      value: 2.463808
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 5.31
+      value: 4.9919
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.02
+      value: 2.3837
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c8cecca62e6c74657869c3352c9c1caf, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2341,10 +2329,10 @@ MonoBehaviour:
   trueUntunedStaticVolume: 1
   tunedStaticFloorVolume: 0
   trueChannelPreviewChoirVolume: 0.6
-  scanHintText: Scan channels with left knob.
-  tuneHintText: Tune with right knob.
-  decodedHintText: Decoded. Pull lever to translate.
-  solvedHintText: Translation complete.
+  scanHintText: 
+  tuneHintText: 
+  decodedHintText: 
+  solvedHintText: 
   translatedMessageText: We are sending our troops on foot from the eastern forest
     to attack.
 --- !u!114 &659512996
