@@ -1,8 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 // radio puzzle logic for tutorial
 //  1. tracks puzzle state (scan -> tune -> decoded -> solved)
@@ -14,8 +13,14 @@ public class RadioTutorialPuzzle : MonoBehaviour
 {
     // raised once when player first lands on the true left knob channel
     public event Action TrueChannelFound;
+    // raised when the player locks in the correct left knob channel
+    public event Action CorrectChannelSubmitted;
+    // raised when the player locks in the wrong left knob channel
+    public event Action IncorrectChannelSubmitted;
     // raised once when player first enters the valid right knob tune zone
     public event Action RightKnobTuned;
+    // raised when the player locks in the wrong right knob tuning
+    public event Action IncorrectRightKnobSubmitted;
     // raised when player pulls lever and translated text is shown
     public event Action LeverPulled;
     // raised when the lever is pulled and the post-pull presentation should begin
@@ -32,7 +37,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private RadioController radioController;
-    [SerializeField] private Button leverButton;
+    [SerializeField] [InspectorName("Dialogue")] private InkDialogue dialogueGate;
     [SerializeField] private TMP_Text hintText;
     [SerializeField] private TMP_Text subtitleText;
 
@@ -45,22 +50,17 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private RectTransform clearancePointerStartTarget;
     [SerializeField] private RectTransform clearancePointerEndTarget;
 
-    [Header("Audio Sources")]
-    [SerializeField] private AudioSource staticLoopSource;
-    [SerializeField] private AudioSource choirLoopSource;
-    [FormerlySerializedAs("sfxSource")]
-    [SerializeField] private AudioSource successAudioSource;
-
-    [Header("Audio Clips")]
-    [SerializeField] private AudioClip staticClip;
-    [SerializeField] private AudioClip choirClip;
-    [SerializeField] private AudioClip successBingClip;
-
-    [Header("Puzzle Config")]
+    [Header("Channel Selection")]
     [Tooltip("Total number of channel positions on the left knob.")]
     [SerializeField] private int channelCount = 8;
     [Tooltip("Which channel index (0-based) is the real signal channel.")]
     [SerializeField] private int trueChannelIndex = 2;
+    [Tooltip("Require an explicit key press to lock in the left knob channel before tuning can begin.")]
+    [SerializeField] private bool requireChannelConfirmation;
+    [Tooltip("Key used to submit the current left knob channel while scanning.")]
+    [SerializeField] private Key channelSubmitKey = Key.Space;
+
+    [Header("Tuning")]
     [Tooltip("Right knob target position in normalized range [0..1) where tuning is optimal.")]
     [SerializeField] private float tuningTargetNormalized = 0.38f;
     [Tooltip("How far from the tuning target still counts as 'in tune' (normalized range).")]
@@ -71,6 +71,16 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private float requiredHoldSeconds = 1.0f;
     [Tooltip("How long the player can drift out of tune before tuning progress resets.")]
     [SerializeField] private float outOfTuneGraceSeconds = 0.15f;
+
+    [Header("Audio Sources")]
+    [SerializeField] private AudioSource staticLoopSource;
+    [SerializeField] private AudioSource choirLoopSource;
+    [SerializeField] private AudioSource successAudioSource;
+
+    [Header("Audio Clips")]
+    [SerializeField] private AudioClip staticClip;
+    [SerializeField] private AudioClip choirClip;
+    [SerializeField] private AudioClip successBingClip;
 
     [Header("Audio Mix")]
     [Tooltip("Static volume on incorrect channels while scanning with the left knob.")]
@@ -83,11 +93,9 @@ public class RadioTutorialPuzzle : MonoBehaviour
     [SerializeField] private float trueChannelPreviewChoirVolume = 0.08f;
 
     [Header("Text")]
-    [SerializeField] private string scanHintText = "Scan channels with left knob.";
-    [SerializeField] private string tuneHintText = "Tune with right knob.";
-    [SerializeField] private string decodedHintText = "Decoded. Pull lever to translate.";
-    [SerializeField] private string solvedHintText = "Translation complete.";
-    [FormerlySerializedAs("solvedSubtitleText")]
+    [SerializeField] [InspectorName("Left Knob Hint Text")] private string scanHintText = "Scan channels with left knob.";
+    [SerializeField] [InspectorName("Right Knob Click Hint Text")] private string clickRightKnobHintText = "Click on Right Knob.";
+    [SerializeField] [InspectorName("Right Knob Hint Text")] private string tuneHintText = "Tune with right knob.";
     [SerializeField] [TextArea] public string translatedMessageText = "[TRANSLATED MESSAGE]";
 
     private PuzzleState puzzleState;
@@ -147,8 +155,20 @@ public class RadioTutorialPuzzle : MonoBehaviour
             StopAudioLoops();
         }
 
+        if (puzzleState == PuzzleState.Tune)
+        {
+            UpdateTuneStageHint();
+        }
+
         if (puzzleState != PuzzleState.Tune || !IsOnTrueChannel())
         {
+            HandleSubmitInput();
+            return;
+        }
+
+        if (requireChannelConfirmation)
+        {
+            HandleSubmitInput();
             return;
         }
 
@@ -170,6 +190,8 @@ public class RadioTutorialPuzzle : MonoBehaviour
         {
             CompleteDecode();
         }
+
+        HandleSubmitInput();
     }
 
     // called by pull lever button
@@ -214,7 +236,7 @@ public class RadioTutorialPuzzle : MonoBehaviour
         }
 
         puzzleState = PuzzleState.Solved;
-        SetHint(solvedHintText);
+        SetHint(string.Empty);
 
         if (subtitleText != null)
         {
@@ -238,11 +260,6 @@ public class RadioTutorialPuzzle : MonoBehaviour
         {
             Debug.LogError("RadioTutorialPuzzle: radioController is not assigned.");
             isValid = false;
-        }
-
-        if (leverButton == null)
-        {
-            Debug.LogWarning("RadioTutorialPuzzle: leverButton is not assigned. Visual lever interaction will still work.");
         }
 
         if (staticLoopSource == null)
@@ -366,11 +383,6 @@ public class RadioTutorialPuzzle : MonoBehaviour
         hasBroadcastTrueChannelFound = false;
         hasBroadcastRightKnobTuned = false;
 
-        if (leverButton != null)
-        {
-            leverButton.interactable = false;
-        }
-
         if (subtitleText != null)
         {
             subtitleText.gameObject.SetActive(false);
@@ -427,15 +439,18 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         if (IsOnTrueChannel())
         {
-            puzzleState = PuzzleState.Tune;
-            if (!hasBroadcastTrueChannelFound)
+            if (!requireChannelConfirmation)
             {
-                hasBroadcastTrueChannelFound = true;
-                TrueChannelFound?.Invoke();
+                puzzleState = PuzzleState.Tune;
+                BroadcastTrueChannelFound();
+                UpdateTuneStageHint();
+                EvaluateTrueChannelTuning(true);
+                return;
             }
 
-            SetHint(tuneHintText);
-            EvaluateTrueChannelTuning();
+            puzzleState = PuzzleState.Scan;
+            SetHint(scanHintText);
+            EvaluateTrueChannelTuning(false);
             return;
         }
 
@@ -455,11 +470,11 @@ public class RadioTutorialPuzzle : MonoBehaviour
             return;
         }
 
-        EvaluateTrueChannelTuning();
+        EvaluateTrueChannelTuning(!requireChannelConfirmation);
     }
 
     // computes clarity from circular distance and updates audio mix
-    private void EvaluateTrueChannelTuning()
+    private void EvaluateTrueChannelTuning(bool allowProgression)
     {
         var distance = CircularDistance01(cachedRightKnobNormalized, tuningTargetNormalized);
         var clarity = Mathf.Clamp01(1f - (distance / feedbackZoneHalfWidth));
@@ -467,11 +482,131 @@ public class RadioTutorialPuzzle : MonoBehaviour
         ApplyTrueChannelAudioMix(clarity);
         isInTuneZone = distance <= tuningZoneHalfWidth;
 
-        if (isInTuneZone && !hasBroadcastRightKnobTuned)
+        if (allowProgression && isInTuneZone && !hasBroadcastRightKnobTuned)
         {
             hasBroadcastRightKnobTuned = true;
             RightKnobTuned?.Invoke();
         }
+    }
+
+    private void HandleSubmitInput()
+    {
+        if (ShouldAcceptLeftChannelSubmission())
+        {
+            SubmitCurrentChannelSelection();
+            return;
+        }
+
+        if (ShouldAcceptRightKnobSubmission())
+        {
+            SubmitCurrentRightKnobSelection();
+        }
+    }
+
+    private bool ShouldAcceptLeftChannelSubmission()
+    {
+        if (!requireChannelConfirmation || channelSubmitKey == Key.None)
+        {
+            return false;
+        }
+
+        if (puzzleState != PuzzleState.Scan)
+        {
+            return false;
+        }
+
+        if (radioController == null || !radioController.IsCloseUpOpen || radioController.ActiveKnob != RadioKnobId.Left)
+        {
+            return false;
+        }
+
+        if (dialogueGate != null && dialogueGate.IsDialogueActive)
+        {
+            return false;
+        }
+
+        var keyboard = Keyboard.current;
+        return keyboard != null && keyboard[channelSubmitKey].wasPressedThisFrame;
+    }
+
+    private bool ShouldAcceptRightKnobSubmission()
+    {
+        if (!requireChannelConfirmation || channelSubmitKey == Key.None)
+        {
+            return false;
+        }
+
+        if (puzzleState != PuzzleState.Tune)
+        {
+            return false;
+        }
+
+        if (radioController == null || !radioController.IsCloseUpOpen || radioController.ActiveKnob != RadioKnobId.Right)
+        {
+            return false;
+        }
+
+        if (dialogueGate != null && dialogueGate.IsDialogueActive)
+        {
+            return false;
+        }
+
+        var keyboard = Keyboard.current;
+        return keyboard != null && keyboard[channelSubmitKey].wasPressedThisFrame;
+    }
+
+    private void SubmitCurrentChannelSelection()
+    {
+        if (IsOnTrueChannel())
+        {
+            puzzleState = PuzzleState.Tune;
+            BroadcastTrueChannelFound();
+            CorrectChannelSubmitted?.Invoke();
+            UpdateTuneStageHint();
+            EvaluateTrueChannelTuning(true);
+            return;
+        }
+
+        IncorrectChannelSubmitted?.Invoke();
+        SetHint(scanHintText);
+    }
+
+    private void SubmitCurrentRightKnobSelection()
+    {
+        if (isInTuneZone)
+        {
+            if (!hasBroadcastRightKnobTuned)
+            {
+                hasBroadcastRightKnobTuned = true;
+                RightKnobTuned?.Invoke();
+            }
+
+            CompleteDecode();
+            return;
+        }
+
+        IncorrectRightKnobSubmitted?.Invoke();
+        SetHint(tuneHintText);
+    }
+
+    private void BroadcastTrueChannelFound()
+    {
+        if (hasBroadcastTrueChannelFound)
+        {
+            return;
+        }
+
+        hasBroadcastTrueChannelFound = true;
+        TrueChannelFound?.Invoke();
+    }
+
+    private void UpdateTuneStageHint()
+    {
+        var isRightKnobOpen = radioController != null
+            && radioController.IsCloseUpOpen
+            && radioController.ActiveKnob == RadioKnobId.Right;
+
+        SetHint(isRightKnobOpen ? tuneHintText : clickRightKnobHintText);
     }
 
     // marks decode complete when hold timer threshold is reached
@@ -488,17 +623,12 @@ public class RadioTutorialPuzzle : MonoBehaviour
 
         ApplyTrueChannelAudioMix(1f);
 
-        if (leverButton != null)
-        {
-            leverButton.interactable = true;
-        }
-
         if (successAudioSource != null && successBingClip != null)
         {
             successAudioSource.PlayOneShot(successBingClip, ClipVolumeRegistry.ScaleVolume(successBingClip, 1f));
         }
 
-        SetHint(decodedHintText);
+        SetHint(string.Empty);
     }
 
     private void HandleLeverThresholdReached()

@@ -40,8 +40,11 @@ public class InkDialogue : MonoBehaviour
 
     [Header("Gameplay Triggers")]
     [SerializeField] private RadioTutorialPuzzle radioTutorialPuzzle;
+    [SerializeField] private bool useChannelSubmissionEvents;
     [SerializeField] private string trueChannelFoundKnot;
+    [SerializeField] private string incorrectChannelSubmittedKnot;
     [SerializeField] private string rightKnobTunedKnot;
+    [SerializeField] private string incorrectRightKnobSubmittedKnot;
     [SerializeField] private string leverPulledKnot;
 
     [Header("UI")]
@@ -89,7 +92,17 @@ public class InkDialogue : MonoBehaviour
     {
         if (radioTutorialPuzzle != null)
         {
-            radioTutorialPuzzle.TrueChannelFound += HandleTrueChannelFound;
+            if (useChannelSubmissionEvents)
+            {
+                radioTutorialPuzzle.CorrectChannelSubmitted += HandleCorrectChannelSubmitted;
+                radioTutorialPuzzle.IncorrectChannelSubmitted += HandleIncorrectChannelSubmitted;
+                radioTutorialPuzzle.IncorrectRightKnobSubmitted += HandleIncorrectRightKnobSubmitted;
+            }
+            else
+            {
+                radioTutorialPuzzle.TrueChannelFound += HandleTrueChannelFound;
+            }
+
             radioTutorialPuzzle.RightKnobTuned += HandleRightKnobTuned;
             radioTutorialPuzzle.LeverPulled += HandleLeverPulled;
         }
@@ -105,7 +118,17 @@ public class InkDialogue : MonoBehaviour
     {
         if (radioTutorialPuzzle != null)
         {
-            radioTutorialPuzzle.TrueChannelFound -= HandleTrueChannelFound;
+            if (useChannelSubmissionEvents)
+            {
+                radioTutorialPuzzle.CorrectChannelSubmitted -= HandleCorrectChannelSubmitted;
+                radioTutorialPuzzle.IncorrectChannelSubmitted -= HandleIncorrectChannelSubmitted;
+                radioTutorialPuzzle.IncorrectRightKnobSubmitted -= HandleIncorrectRightKnobSubmitted;
+            }
+            else
+            {
+                radioTutorialPuzzle.TrueChannelFound -= HandleTrueChannelFound;
+            }
+
             radioTutorialPuzzle.RightKnobTuned -= HandleRightKnobTuned;
             radioTutorialPuzzle.LeverPulled -= HandleLeverPulled;
         }
@@ -176,6 +199,26 @@ public class InkDialogue : MonoBehaviour
         StartDialogueAtKnot(trueChannelFoundKnot);
     }
 
+    private void HandleCorrectChannelSubmitted()
+    {
+        if (string.IsNullOrWhiteSpace(trueChannelFoundKnot))
+        {
+            return;
+        }
+
+        StartDialogueAtKnot(trueChannelFoundKnot);
+    }
+
+    private void HandleIncorrectChannelSubmitted()
+    {
+        if (string.IsNullOrWhiteSpace(incorrectChannelSubmittedKnot))
+        {
+            return;
+        }
+
+        StartDialogueAtKnot(incorrectChannelSubmittedKnot);
+    }
+
     // starts dialogue when right knob is at correct tuning zone
     private void HandleRightKnobTuned()
     {
@@ -185,6 +228,16 @@ public class InkDialogue : MonoBehaviour
         }
 
         StartDialogueAtKnot(rightKnobTunedKnot);
+    }
+
+    private void HandleIncorrectRightKnobSubmitted()
+    {
+        if (string.IsNullOrWhiteSpace(incorrectRightKnobSubmittedKnot))
+        {
+            return;
+        }
+
+        StartDialogueAtKnot(incorrectRightKnobSubmittedKnot);
     }
 
     // starts dialogue when lever is pulled

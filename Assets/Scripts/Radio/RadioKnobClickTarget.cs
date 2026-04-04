@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 // click target used by radio knobs
 // routes click to radio controller and opens close-up
@@ -11,11 +10,8 @@ public class RadioKnobClickTarget : MonoBehaviour, IPointerClickHandler
     [SerializeField] private bool leftClickOnly = true;
 
     [Header("Click SFX")]
-    [FormerlySerializedAs("knobClickAudioSource")]
     [SerializeField] private AudioSource clickAudioSource;
-    [FormerlySerializedAs("knobClickClip")]
     [SerializeField] private AudioClip clickClip;
-    [FormerlySerializedAs("knobClickVolume")]
     [SerializeField] [Range(0f, 1f)] private float clickVolume = 1f;
 
     // called by event system on pointer click

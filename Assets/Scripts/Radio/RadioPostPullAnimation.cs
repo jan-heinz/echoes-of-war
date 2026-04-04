@@ -9,11 +9,9 @@ public class RadioPostPullAnimation : MonoBehaviour
     [SerializeField] private GameObject radioAnimationView;
     [SerializeField] private Animator radioAnimator;
     [SerializeField] private AnimationClip radioAnimationClip;
-    [SerializeField] private string radioAnimationStateName;
     [SerializeField] private GameObject juicerExecuteAnimationView;
     [SerializeField] private Animator juicerExecuteAnimator;
     [SerializeField] private AnimationClip juicerExecuteAnimationClip;
-    [SerializeField] private string juicerExecuteAnimationStateName;
     [SerializeField] private float fallbackDurationSeconds = 1f;
 
     private Coroutine playRoutine;
@@ -67,7 +65,7 @@ public class RadioPostPullAnimation : MonoBehaviour
             radioAnimationView.SetActive(true);
         }
 
-        PlayAnimation(radioAnimator, radioAnimationStateName);
+        ResetAnimator(radioAnimator);
 
         // Let the animated view become visible before hiding the static view underneath it.
         yield return null;
@@ -87,7 +85,7 @@ public class RadioPostPullAnimation : MonoBehaviour
         }
 
         SetViewActive(juicerIdleView, false);
-        PlayAnimation(juicerExecuteAnimator, juicerExecuteAnimationStateName);
+        ResetAnimator(juicerExecuteAnimator);
         yield return new WaitForSeconds(GetDuration(juicerExecuteAnimationClip));
 
         if (juicerExecuteAnimationView != null)
@@ -113,7 +111,7 @@ public class RadioPostPullAnimation : MonoBehaviour
             : Mathf.Max(0.01f, fallbackDurationSeconds);
     }
 
-    private static void PlayAnimation(Animator animator, string stateName)
+    private static void ResetAnimator(Animator animator)
     {
         if (animator == null)
         {
@@ -122,11 +120,6 @@ public class RadioPostPullAnimation : MonoBehaviour
 
         animator.Rebind();
         animator.Update(0f);
-
-        if (!string.IsNullOrWhiteSpace(stateName))
-        {
-            animator.Play(stateName, 0, 0f);
-        }
     }
 
     private static void SetViewsActive(GameObject[] views, bool isActive)

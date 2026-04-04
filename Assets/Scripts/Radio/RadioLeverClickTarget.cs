@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 public class RadioLeverClickTarget : MonoBehaviour, IPointerClickHandler
 {
@@ -9,11 +8,8 @@ public class RadioLeverClickTarget : MonoBehaviour, IPointerClickHandler
     [SerializeField] private bool leftClickOnly = true;
 
     [Header("Click SFX")]
-    [FormerlySerializedAs("leverClickAudioSource")]
     [SerializeField] private AudioSource clickAudioSource;
-    [FormerlySerializedAs("leverClickClip")]
     [SerializeField] private AudioClip clickClip;
-    [FormerlySerializedAs("leverClickVolume")]
     [SerializeField] [Range(0f, 1f)] private float clickVolume = 1f;
 
     public void OnPointerClick(PointerEventData eventData)

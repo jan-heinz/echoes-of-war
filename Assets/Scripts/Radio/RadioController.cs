@@ -56,17 +56,12 @@ public class RadioController : MonoBehaviour
 
     [Header("Close-Up UI")]
     [SerializeField] private GameObject closeUpPanel;
-    [SerializeField] private Button closeUpBackButton;
     [SerializeField] private GameObject worldRadioView;
     [SerializeField] private GameObject worldJuicerIdleView;
     [SerializeField] private Transform leftCloseUpKnobPivot;
     [SerializeField] private Transform rightCloseUpKnobPivot;
     [SerializeField] private RectTransform closeUpLever;
     [SerializeField] private RectTransform closeUpLeverEndpoint;
-
-    [Header("Close-Up Selection")]
-    [SerializeField] private Outline leftCloseUpKnobOutline;
-    [SerializeField] private Outline rightCloseUpKnobOutline;
     
     [Header("Close-Up Selection Sprite Swap (Optional)")]
     [SerializeField] private Image leftCloseUpKnobImage;
@@ -110,14 +105,6 @@ public class RadioController : MonoBehaviour
 
     // lets other scripts query which knob is currently active
     public RadioKnobId ActiveKnob => activeKnob;
-
-    private void Awake()
-    {
-        if (closeUpBackButton != null)
-        {
-            closeUpBackButton.onClick.AddListener(CloseCloseUp);
-        }
-    }
 
     private void Start()
     {
@@ -194,15 +181,6 @@ public class RadioController : MonoBehaviour
         RotateActiveKnob(angleDelta);
     }
 
-    private void OnDestroy()
-    {
-        // unhook back button listener
-        if (closeUpBackButton != null)
-        {
-            closeUpBackButton.onClick.RemoveListener(CloseCloseUp);
-        }
-    }
-
     // opens close-up mode and sets the active knob
     public void OpenCloseUp(RadioKnobId knobId)
     {
@@ -247,7 +225,6 @@ public class RadioController : MonoBehaviour
     }
 
     // closes close-up mode
-    // esc key and back button both work
     public void CloseCloseUp()
     {
         isCloseUpOpen = false;
@@ -409,12 +386,8 @@ public class RadioController : MonoBehaviour
     }
 
     // updates close-up selected state visuals
-    // supports optional sprite swap with outline fallback
     private void UpdateCloseUpSelectionVisuals()
     {
-        var leftUsesSpriteSwap = leftCloseUpKnobImage != null && closeUpKnobSelectedSprite != null;
-        var rightUsesSpriteSwap = rightCloseUpKnobImage != null && closeUpKnobSelectedSprite != null;
-
         ApplyCloseUpKnobSpriteSelection(
             leftCloseUpKnobImage,
             leftCloseUpKnobDefaultSprite,
@@ -426,16 +399,6 @@ public class RadioController : MonoBehaviour
             rightCloseUpKnobDefaultSprite,
             closeUpKnobSelectedSprite,
             isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Right);
-
-        if (leftCloseUpKnobOutline != null)
-        {
-            leftCloseUpKnobOutline.enabled = !leftUsesSpriteSwap && isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Left;
-        }
-
-        if (rightCloseUpKnobOutline != null)
-        {
-            rightCloseUpKnobOutline.enabled = !rightUsesSpriteSwap && isCloseUpOpen && !isLeverPulling && activeKnob == RadioKnobId.Right;
-        }
     }
 
     private void UpdateLeverPullAnimation()

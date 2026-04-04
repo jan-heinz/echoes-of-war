@@ -15,9 +15,17 @@ Nice work, you found the correct frequency. # speaker:fern
 Now let's move onto the right knob. This is where you are going to enhance the clarity of the frequency. Make small adjustments to make the choir sound more clear.
 -> END
 
+=== incorrect_frequency ===
+That is not the correct frequency. Keep scanning and lock in your choice when you are confident. # speaker:fern
+-> END
+
 === right_knob_tuned ===
 Perfect, your right knob tuning is on target. # speaker:fern
 Pull the level to decode the message.
+-> END
+
+=== incorrect_tuning ===
+That tuning is not quite right. Keep adjusting and lock in your choice when you are confident. # speaker:fern
 -> END
  
  ===lever_pulled==
@@ -86,5 +94,3 @@ Oh no! I mean, amazing work, but the message isn't good news. However, now you c
 
      
      
-
-
