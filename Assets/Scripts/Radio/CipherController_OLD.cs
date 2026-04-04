@@ -1,11 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 using TMPro;
 using UnicornCipher;
-
+/*
 /// <summary>
 /// Attach this to a GameObject in your scene.
 /// Displays the Unicorn Cipher puzzle and handles player input.
@@ -32,25 +30,12 @@ public class CipherController : MonoBehaviour
     public RectTransform hornCursor;
     [Tooltip("Optional: assign the horn sprite here to show/hide it with the puzzle.")]
     public GameObject hornSprite;
-    [Tooltip("Image component on the horn cursor (for sprite swapping on W/S press).")]
-    public Image hornImage;
-    [Tooltip("Sprite shown when horn is idle.")]
-    public Sprite hornNormalSprite;
-    [Tooltip("Sprite shown while W or S is held (color cycling).")]
-    public Sprite hornPressedSprite;
+
     [Tooltip("How far below each word label the horn sits (negative = below).")]
     public float hornYOffset = -40f;
 
     [Tooltip("Seconds between input repeats when key is held.")]
     public float inputRepeatDelay = 0.15f;
-
-    [Header("Word Glow Effect")]
-    [Tooltip("A single glow Image that sits above the horn and flashes when the color changes.")]
-    public Image glowImage;
-    [Tooltip("How far above the horn cursor the glow sits.")]
-    public float glowYOffset = 20f;
-    [Tooltip("How long the glow takes to fade in then out (seconds).")]
-    public float glowDuration = 0.35f;
 
     [Header("Solved State")]
     [Tooltip("Object to activate when the puzzle is solved (e.g. a victory panel).")]
@@ -72,13 +57,13 @@ public class CipherController : MonoBehaviour
     // ROYGBIV colors mapped for TMP display
     private static readonly Dictionary<CipherColor, Color> ColorMap = new Dictionary<CipherColor, Color>
     {
-        { CipherColor.Red,    new Color(0.96f, 0.62f, 0.67f) },  // pastel rose
-        { CipherColor.Orange, new Color(1.00f, 0.78f, 0.62f) },  // pastel peach
-        { CipherColor.Yellow, new Color(0.97f, 0.95f, 0.72f) },  // pastel lemon
-        { CipherColor.Green,  new Color(0.62f, 0.92f, 0.80f) },  // pastel mint
-        { CipherColor.Blue,   new Color(0.62f, 0.78f, 0.98f) },  // pastel periwinkle
-        { CipherColor.Indigo, new Color(0.68f, 0.62f, 0.95f) },  // pastel lavender
-        { CipherColor.Violet, new Color(0.82f, 0.65f, 0.97f) },  // pastel lilac
+        { CipherColor.Red,    new Color(0.93f, 0.18f, 0.18f) },
+        { CipherColor.Orange, new Color(1.00f, 0.55f, 0.10f) },
+        { CipherColor.Yellow, new Color(0.95f, 0.90f, 0.10f) },
+        { CipherColor.Green,  new Color(0.18f, 0.80f, 0.25f) },
+        { CipherColor.Blue,   new Color(0.20f, 0.55f, 1.00f) },
+        { CipherColor.Indigo, new Color(0.35f, 0.20f, 0.85f) },
+        { CipherColor.Violet, new Color(0.70f, 0.25f, 0.90f) },
     };
 
     // ── Unity Lifecycle ─────────────────────────────────────────────────
@@ -93,7 +78,7 @@ public class CipherController : MonoBehaviour
             solvedPanel.SetActive(false);
 
         RefreshAllWords();
-        StartCoroutine(PlaceHornAfterLayout());
+        MoveCursorTo(0);
         inkDialogue.StartDialogueAtKnot("Unicorn_Start");
     }
 
@@ -113,8 +98,8 @@ public class CipherController : MonoBehaviour
         // Fresh key presses
         if (kb.aKey.wasPressedThisFrame)      { heldTimer = 0f; lastKey = "A"; MoveCursor(-1); }
         else if (kb.dKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "D"; MoveCursor(1);  }
-        else if (kb.wKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "W"; CycleColor(-1); SetHornSprite(true); }
-        else if (kb.sKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "S"; CycleColor(1);  SetHornSprite(true); }
+        else if (kb.wKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "W"; CycleColor(-1); }
+        else if (kb.sKey.wasPressedThisFrame) { heldTimer = 0f; lastKey = "S"; CycleColor(1);  }
 
         // Key-held repeat
         if (lastKey != "" && IsKeyHeld(lastKey))
@@ -132,10 +117,6 @@ public class CipherController : MonoBehaviour
                 }
             }
         }
-
-        // Swap back to normal sprite when W/S released
-        if ((lastKey == "W" || lastKey == "S") && !IsKeyHeld(lastKey))
-            SetHornSprite(false);
 
         // Clear lastKey when released
         if (lastKey != "" && !IsKeyHeld(lastKey))
@@ -167,14 +148,6 @@ public class CipherController : MonoBehaviour
         UpdateColorLabel();
     }
 
-    // ── Horn Sprite Swap ─────────────────────────────────────────────────
-    void SetHornSprite(bool pressed)
-    {
-        if (hornImage == null) return;
-        var sprite = pressed ? hornPressedSprite : hornNormalSprite;
-        if (sprite != null) hornImage.sprite = sprite;
-    }
-
     // ── Color Cycling ────────────────────────────────────────────────────
     void CycleColor(int dir)
     {
@@ -188,30 +161,18 @@ public class CipherController : MonoBehaviour
         selectedColors[cursorIndex] = (CipherColor)next;
 
         RefreshWord(cursorIndex);
-
-        if (glowImage != null && hornCursor != null)
-        {
-            glowImage.rectTransform.position = new Vector3(
-                hornCursor.position.x,
-                hornCursor.position.y + glowYOffset,
-                hornCursor.position.z
-            );
-            StopCoroutine("FlashGlow");
-            StartCoroutine("FlashGlow");
-        }
-
         UpdateColorLabel();
         CheckSolved();
 
-        //Check if first word solved
-        if (!first)
+        //Check if first word solved 
+            if (!first)
         {
-            if (selectedColors[cursorIndex] == UnicornCipherPuzzle.Words[cursorIndex].CorrectColor)
+           if (selectedColors[cursorIndex] == CipherColor.Blue)
             {
                 first = true;
                 inkDialogue.StartDialogueAtKnot("Unicorn_First");
             }
-        }
+        } 
     }
 
     // ── Display Refresh ──────────────────────────────────────────────────
@@ -230,36 +191,6 @@ public class CipherController : MonoBehaviour
 
         wordLabels[idx].text  = word.GetEncoded(color);
         wordLabels[idx].color = ColorMap[color];
-    }
-
-    IEnumerator PlaceHornAfterLayout()
-    {
-        yield return null; // wait one frame for Canvas layout to finalize
-        MoveCursorTo(0);
-    }
-
-    IEnumerator FlashGlow()
-    {
-        float half = glowDuration * 0.5f;
-        // Fade in
-        for (float t = 0; t < half; t += Time.deltaTime)
-        {
-            var c = glowImage.color;
-            c.a = t / half;
-            glowImage.color = c;
-            yield return null;
-        }
-        // Fade out
-        for (float t = 0; t < half; t += Time.deltaTime)
-        {
-            var c = glowImage.color;
-            c.a = 1f - t / half;
-            glowImage.color = c;
-            yield return null;
-        }
-        var final = glowImage.color;
-        final.a = 0f;
-        glowImage.color = final;
     }
 
     void UpdateColorLabel()
@@ -323,3 +254,4 @@ public class CipherController : MonoBehaviour
         }
     }
 }
+*/
