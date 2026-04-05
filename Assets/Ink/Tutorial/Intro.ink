@@ -21,7 +21,7 @@ That is not the correct frequency. Keep scanning and lock in your choice when yo
 
 === right_knob_tuned ===
 Perfect, your right knob tuning is on target. # speaker:fern
-Pull the level to decode the message.
+Click on the red level to decode the message.
 -> END
 
 === incorrect_tuning ===

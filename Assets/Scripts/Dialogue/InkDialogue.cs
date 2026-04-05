@@ -50,6 +50,7 @@ public class InkDialogue : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private TMP_Text dialogueText;
+    [SerializeField] private TMP_Text dialogueCounterText;
     [SerializeField] private TMP_Text speakerNameText;
     [SerializeField] private Image speakerPortraitImage;
     [SerializeField] private Button dialogueClickTarget;
@@ -77,6 +78,8 @@ public class InkDialogue : MonoBehaviour
     private bool isLineRevealing;
     private string currentFullLine = string.Empty;
     private Coroutine lineRevealCoroutine;
+    private int currentSequenceLineIndex;
+    private int currentSequenceLineCount;
 
     // wires dialogue click target
     private void Awake()
@@ -171,6 +174,7 @@ public class InkDialogue : MonoBehaviour
             dialoguePanel.SetActive(true);
         }
 
+        RefreshDialogueProgressFromCurrentState();
         ClearSpeakerVisuals();
         isPausedForPopup = false;
         dialogueClickTarget.interactable = true;
@@ -336,6 +340,8 @@ public class InkDialogue : MonoBehaviour
                 continue;
             }
 
+            currentSequenceLineIndex = Mathf.Min(currentSequenceLineIndex + 1, currentSequenceLineCount);
+            UpdateDialogueProgressText();
             ApplySpeakerFromTags(story.currentTags);
             ShowLine(nextLine.Trim());
             return;
@@ -355,6 +361,7 @@ public class InkDialogue : MonoBehaviour
         */
 
         dialogueText.text = string.Empty;
+        ClearDialogueProgress();
         dialogueClickTarget.interactable = false;
 
         if (hidePanelWhenDone && dialoguePanel != null)
@@ -392,6 +399,7 @@ public class InkDialogue : MonoBehaviour
         }
 
         ClearSpeakerVisuals();
+        RefreshDialogueProgressFromCurrentState();
         dialoguePanel.SetActive(true);
         dialogueClickTarget.interactable = true;
         AdvanceDialogue();
@@ -698,6 +706,69 @@ public class InkDialogue : MonoBehaviour
         }
     }
 
+    private void RefreshDialogueProgressFromCurrentState()
+    {
+        currentSequenceLineIndex = 0;
+        currentSequenceLineCount = CountRemainingDisplayLines();
+        UpdateDialogueProgressText();
+    }
+
+    private int CountRemainingDisplayLines()
+    {
+        if (story == null || compiledInkJson == null)
+        {
+            return 0;
+        }
+
+        try
+        {
+            var previewStory = new Story(compiledInkJson.text);
+            previewStory.state.LoadJson(story.state.ToJson());
+
+            var count = 0;
+            while (previewStory.canContinue)
+            {
+                var nextLine = previewStory.Continue();
+                if (string.IsNullOrWhiteSpace(nextLine))
+                {
+                    continue;
+                }
+
+                count++;
+            }
+
+            return count;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"InkDialogue: failed to count dialogue lines. {ex.Message}");
+            return 0;
+        }
+    }
+
+    private void UpdateDialogueProgressText()
+    {
+        if (dialogueCounterText == null)
+        {
+            return;
+        }
+
+        if (currentSequenceLineCount <= 0 || currentSequenceLineIndex <= 0)
+        {
+            dialogueCounterText.text = string.Empty;
+            return;
+        }
+
+        dialogueCounterText.text = $"{currentSequenceLineIndex}/{currentSequenceLineCount}";
+    }
+
+    private void ClearDialogueProgress()
+    {
+        currentSequenceLineIndex = 0;
+        currentSequenceLineCount = 0;
+        UpdateDialogueProgressText();
+    }
+
     private void CacheQueuedKnots()
     {
         queuedKnots.Clear();
@@ -788,6 +859,7 @@ public class InkDialogue : MonoBehaviour
         dialogueClickTarget.interactable = true;
 
         story.ChooseChoiceIndex(index);
+        RefreshDialogueProgressFromCurrentState();
         AdvanceDialogue();
     }
 
