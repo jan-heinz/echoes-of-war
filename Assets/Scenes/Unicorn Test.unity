@@ -2793,15 +2793,12 @@ MonoBehaviour:
   leftKnobPivot: {fileID: 387391617}
   rightKnobPivot: {fileID: 197851707}
   closeUpPanel: {fileID: 1089530229}
-  closeUpBackButton: {fileID: 0}
   worldRadioView: {fileID: 965486201}
   worldJuicerIdleView: {fileID: 1676398109}
   leftCloseUpKnobPivot: {fileID: 429182718}
   rightCloseUpKnobPivot: {fileID: 458745065}
   closeUpLever: {fileID: 1583876975}
   closeUpLeverEndpoint: {fileID: 997129935}
-  leftCloseUpKnobOutline: {fileID: 0}
-  rightCloseUpKnobOutline: {fileID: 0}
   leftCloseUpKnobImage: {fileID: 429182719}
   rightCloseUpKnobImage: {fileID: 458745066}
   closeUpKnobSelectedSprite: {fileID: 5145929478218447413, guid: b0a30ca7735f24b269f0419fdf1368c5, type: 3}
@@ -2851,7 +2848,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RadioTutorialPuzzle
   radioController: {fileID: 659512993}
-  leverButton: {fileID: 0}
+  dialogueGate: {fileID: 0}
   hintText: {fileID: 1312651048}
   subtitleText: {fileID: 701591362}
   closeUpCursor: {fileID: 1998474875}
@@ -2867,27 +2864,28 @@ MonoBehaviour:
   closeUpClearancePointer: {fileID: 91494818}
   clearancePointerStartTarget: {fileID: 610841917}
   clearancePointerEndTarget: {fileID: 534270938}
+  channelCount: 8
+  trueChannelIndex: 2
+  requireChannelConfirmation: 0
+  channelSubmitKey: 1
+  tuningTargetNormalized: 0.38
+  tuningZoneHalfWidth: 0.08
+  feedbackZoneHalfWidth: 0.22
+  requiredHoldSeconds: 1
+  outOfTuneGraceSeconds: 0.15
   staticLoopSource: {fileID: 1440151955}
   choirLoopSource: {fileID: 821062990}
   successAudioSource: {fileID: 650576675}
   staticClip: {fileID: 8300000, guid: cc08665bbcfbe49ebb25cf2b0c4068b7, type: 3}
   choirClip: {fileID: 8300000, guid: cf3818a7b033749f59a104a2af6148a0, type: 3}
   successBingClip: {fileID: 8300000, guid: 55808c183464b4c49b4a5e792ae0030d, type: 3}
-  channelCount: 8
-  trueChannelIndex: 2
-  tuningTargetNormalized: 0.38
-  tuningZoneHalfWidth: 0.08
-  feedbackZoneHalfWidth: 0.22
-  requiredHoldSeconds: 1
-  outOfTuneGraceSeconds: 0.15
   decoyStaticVolume: 0.6
   trueUntunedStaticVolume: 0.6
   tunedStaticFloorVolume: 0.2
   trueChannelPreviewChoirVolume: 0.08
   scanHintText: Scan channels with left knob.
+  clickRightKnobHintText: Click on Right Knob.
   tuneHintText: Tune with right knob.
-  decodedHintText: Decoded. Pull lever to translate.
-  solvedHintText: Translation complete.
   translatedMessageText: 
 --- !u!114 &659512996
 MonoBehaviour:
@@ -2907,11 +2905,9 @@ MonoBehaviour:
   radioAnimationView: {fileID: 808488139}
   radioAnimator: {fileID: 808488140}
   radioAnimationClip: {fileID: 5403296475595647899, guid: 1bcc132f03be747a383771c775bf29bb, type: 3}
-  radioAnimationStateName: 
   juicerExecuteAnimationView: {fileID: 258568772}
   juicerExecuteAnimator: {fileID: 258568773}
   juicerExecuteAnimationClip: {fileID: 7147392025192311743, guid: cfd62358423414c0c88d4a654d4fb509, type: 3}
-  juicerExecuteAnimationStateName: 
   fallbackDurationSeconds: 1
 --- !u!1001 &681991309
 PrefabInstance:
@@ -3390,7 +3386,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Congratulations, you've finished the demo, hope you enjoyed!
+  m_text: We formed an alliance with the dragons and sirens.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7869,11 +7865,15 @@ MonoBehaviour:
   nextKnots:
   - briefing
   radioTutorialPuzzle: {fileID: 659512995}
+  useChannelSubmissionEvents: 0
   trueChannelFoundKnot: found_frequency
+  incorrectChannelSubmittedKnot: 
   rightKnobTunedKnot: right_knob_tuned
+  incorrectRightKnobSubmittedKnot: 
   leverPulledKnot: lever_pulled
   dialoguePanel: {fileID: 1054353992}
   dialogueText: {fileID: 1297662386}
+  dialogueCounterText: {fileID: 0}
   speakerNameText: {fileID: 81698207}
   speakerPortraitImage: {fileID: 1008425225}
   dialogueClickTarget: {fileID: 1054353996}
