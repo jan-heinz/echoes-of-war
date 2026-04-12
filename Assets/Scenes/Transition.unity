@@ -468,11 +468,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 882581755}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 972f5f254d53a426b9f58b7bbe51b65f, type: 3}
+  m_Script: {fileID: 11500000, guid: 6f3c6c5305a046f3a6593b71c24cceda, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LoadSceneAfterDelay
-  sceneName: Office v2
-  loadDelaySeconds: 3.5
+  m_EditorClassIdentifier: Assembly-CSharp::TransitionSceneController
+  defaultTargetSceneName: Level1
+  defaultMessages:
+  - 'Audio Required
+
+    Headphones Recommended'
+  messageText: {fileID: 1030860497}
+  displayDurationSeconds: 3.5
+  fadeDurationSeconds: 0.45
 --- !u!4 &882581757
 Transform:
   m_ObjectHideFlags: 0
@@ -559,8 +565,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -687,7 +693,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2236364885319763058, guid: c835638a111cc4899a0355c7761b24d5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

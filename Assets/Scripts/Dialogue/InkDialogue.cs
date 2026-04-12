@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Ink.Runtime;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // minimal ink dialogue flow for tutorial MVP
@@ -65,6 +66,14 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private Button choiceButtonPrefab; 
     [SerializeField] private Transform choiceContainer; 
 
+    [Header("Scene Transition")]
+    [SerializeField] private GameObject nextDayButtonRoot;
+    [SerializeField] private Button nextDayButton;
+    [SerializeField] private string transitionSceneName = "Transition";
+    [SerializeField] private string nextDaySceneName;
+    [SerializeField] [TextArea] private string[] nextDayTransitionMessages = { "Next Day" };
+    [SerializeField] [Min(0f)] private float nextDayFadeDurationSeconds = 0.45f;
+
     [Header("Speakers")]
     [SerializeField] private SpeakerVisual[] speakers;
 
@@ -87,6 +96,11 @@ public class InkDialogue : MonoBehaviour
         if (dialogueClickTarget != null)
         {
             dialogueClickTarget.onClick.AddListener(AdvanceDialogue);
+        }
+
+        if (nextDayButton != null)
+        {
+            nextDayButton.onClick.AddListener(HandleNextDayClicked);
         }
     }
 
@@ -174,6 +188,7 @@ public class InkDialogue : MonoBehaviour
             dialoguePanel.SetActive(true);
         }
 
+        HideNextDayButton();
         RefreshDialogueProgressFromCurrentState();
         ClearSpeakerVisuals();
         isPausedForPopup = false;
@@ -187,6 +202,11 @@ public class InkDialogue : MonoBehaviour
         if (dialogueClickTarget != null)
         {
             dialogueClickTarget.onClick.RemoveListener(AdvanceDialogue);
+        }
+
+        if (nextDayButton != null)
+        {
+            nextDayButton.onClick.RemoveListener(HandleNextDayClicked);
         }
 
         StopLineReveal();
@@ -392,6 +412,7 @@ public class InkDialogue : MonoBehaviour
 
         isPausedForPopup = false;
         StopLineReveal();
+        HideNextDayButton();
 
         if (!TryEnterKnot(knotName))
         {
@@ -550,7 +571,7 @@ public class InkDialogue : MonoBehaviour
 
         var shouldRestoreDialoguePanel = wasDialoguePanelVisibleBeforePopup
             && story != null
-            && (story.canContinue || queuedKnots.Count > 0);
+            && (story.canContinue || story.currentChoices.Count > 0);
 
         if (dialoguePanel != null)
         {
@@ -565,6 +586,11 @@ public class InkDialogue : MonoBehaviour
 
         wasDialoguePanelVisibleBeforePopup = false;
         AdvanceDialogue();
+
+        if (dialoguePanel == null || !dialoguePanel.activeSelf)
+        {
+            ShowNextDayButton();
+        }
     }
 
     // starts displaying a line with typewriter effect
@@ -767,6 +793,67 @@ public class InkDialogue : MonoBehaviour
         currentSequenceLineIndex = 0;
         currentSequenceLineCount = 0;
         UpdateDialogueProgressText();
+    }
+
+    private void ShowNextDayButton()
+    {
+        if (nextDayButtonRoot == null)
+        {
+            return;
+        }
+
+        nextDayButtonRoot.SetActive(true);
+    }
+
+    private void HideNextDayButton()
+    {
+        if (nextDayButtonRoot == null)
+        {
+            return;
+        }
+
+        nextDayButtonRoot.SetActive(false);
+    }
+
+    private void HandleNextDayClicked()
+    {
+        if (!gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        StartCoroutine(BeginNextDayTransition());
+    }
+
+    private System.Collections.IEnumerator BeginNextDayTransition()
+    {
+        if (string.IsNullOrWhiteSpace(transitionSceneName))
+        {
+            Debug.LogWarning("InkDialogue: transitionSceneName is empty.");
+            yield break;
+        }
+
+        if (string.IsNullOrWhiteSpace(nextDaySceneName))
+        {
+            Debug.LogWarning("InkDialogue: nextDaySceneName is empty.");
+            yield break;
+        }
+
+        var transitionBuildIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Scenes/{transitionSceneName}.unity");
+        if (transitionBuildIndex < 0)
+        {
+            Debug.LogError($"InkDialogue: transition scene '{transitionSceneName}' is not in build settings.");
+            yield break;
+        }
+
+        HideNextDayButton();
+
+        var fadeOverlay = ScreenFadeOverlay.EnsureInstance();
+        yield return fadeOverlay.FadeToBlack(nextDayFadeDurationSeconds);
+
+        TransitionSceneController.QueueTransition(nextDaySceneName, nextDayTransitionMessages);
+        fadeOverlay.PrepareFadeInOnNextSceneLoad(nextDayFadeDurationSeconds);
+        SceneManager.LoadScene(transitionSceneName);
     }
 
     private void CacheQueuedKnots()
