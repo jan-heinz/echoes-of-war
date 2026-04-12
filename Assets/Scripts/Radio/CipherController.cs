@@ -52,10 +52,6 @@ public class CipherController : MonoBehaviour
     [Tooltip("How long the glow takes to fade in then out (seconds).")]
     public float glowDuration = 0.35f;
 
-    [Header("Solved State")]
-    [Tooltip("Object to activate when the puzzle is solved (e.g. a victory panel).")]
-    public GameObject solvedPanel;
-
     [Header("Ink Dialogue")]
     [SerializeField] private InkDialogue inkDialogue;
 
@@ -89,9 +85,6 @@ public class CipherController : MonoBehaviour
         foreach (var word in UnicornCipherPuzzle.Words)
             selectedColors.Add(word.StartingColor);
 
-        if (solvedPanel != null)
-            solvedPanel.SetActive(false);
-
         RefreshAllWords();
         StartCoroutine(PlaceHornAfterLayout());
         inkDialogue.StartDialogueAtKnot("Unicorn_Start");
@@ -99,10 +92,19 @@ public class CipherController : MonoBehaviour
 
     void Update()
     {
-    if (solved) return;
-    if (!started) return;
-    if (inkDialogue != null && inkDialogue.IsDialogueActive) return;
-    HandleInput();
+        if (solved) return;
+        if (!started) return;
+        if (inkDialogue != null && inkDialogue.IsDialogueActive)
+        {
+            // Reset horn sprite if dialogue became active while W/S was held
+            if (lastKey == "W" || lastKey == "S")
+            {
+                SetHornSprite(false);
+                lastKey = "";
+            }
+            return;
+        }
+        HandleInput();
     }
 
     // ── Input ────────────────────────────────────────────────────────────
@@ -288,6 +290,8 @@ public class CipherController : MonoBehaviour
     /// </summary>
     public void HidePuzzle()
     {
+        if (messagePanel != null) messagePanel.SetActive(false);
+        if (hornSprite != null)   hornSprite.SetActive(false);
         gameObject.SetActive(false);
     }
 
@@ -301,12 +305,17 @@ public class CipherController : MonoBehaviour
         }
 
         solved = true;
-        if (solvedPanel != null)
-            solvedPanel.SetActive(true);
-        
+        if (hornSprite != null) hornSprite.SetActive(false);
         inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
-        messagePanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Call this (e.g. from an Ink dialogue event or UI button) to hide the puzzle after the solve dialogue ends.
+    /// </summary>
+    public void HideAfterDialogue()
+    {
+        HidePuzzle();
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
