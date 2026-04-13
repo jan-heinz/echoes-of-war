@@ -2781,6 +2781,7 @@ MonoBehaviour:
   juicerExecuteAnimationView: {fileID: 258568772}
   juicerExecuteAnimator: {fileID: 258568773}
   juicerExecuteAnimationClip: {fileID: 7147392025192311743, guid: cfd62358423414c0c88d4a654d4fb509, type: 3}
+  juicerAnimationSfx: {fileID: 0}
   fallbackDurationSeconds: 1
 --- !u!1001 &681991309
 PrefabInstance:
@@ -7686,6 +7687,9 @@ MonoBehaviour:
   speakers:
   - speakerId: fern
     displayName: Fern
+    portrait: {fileID: -1041287022619471339, guid: 1978fc0afd2cd43c89b7aae03ba7180e, type: 3}
+  - speakerId: player
+    displayName: Player
     portrait: {fileID: -1041287022619471339, guid: 1978fc0afd2cd43c89b7aae03ba7180e, type: 3}
 --- !u!4 &1865461103
 Transform:
