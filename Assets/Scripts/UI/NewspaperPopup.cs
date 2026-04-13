@@ -54,10 +54,17 @@ public class NewspaperPopup : MonoBehaviour
             Debug.LogWarning("NewspaperPopup: bodyText is not assigned.");
         }
 
+        ShowExistingText();
+    }
+
+    // shows popup without modifying the current body text
+    public void ShowExistingText()
+    {
         var opened = false;
         if (popupRoot != null)
         {
             popupRoot.SetActive(true);
+            popupRoot.transform.SetAsLastSibling();
             opened = true;
         }
         else

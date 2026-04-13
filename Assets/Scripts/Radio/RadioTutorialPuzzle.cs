@@ -228,16 +228,8 @@ public class RadioTutorialPuzzle : MonoBehaviour
         return puzzleState == PuzzleState.DecodedAwaitLever;
     }
 
-    public void CompleteLeverSequence()
+    public void ShowTranslatedMessage()
     {
-        if (puzzleState != PuzzleState.LeverSequencePlaying)
-        {
-            return;
-        }
-
-        puzzleState = PuzzleState.Solved;
-        SetHint(string.Empty);
-
         if (subtitleText != null)
         {
             subtitleText.text = translatedMessageText;
@@ -247,6 +239,22 @@ public class RadioTutorialPuzzle : MonoBehaviour
         {
             Debug.LogWarning("RadioTutorialPuzzle: subtitleText is not assigned.");
         }
+    }
+
+    public bool HasTranslatedMessageText()
+    {
+        return !string.IsNullOrWhiteSpace(translatedMessageText);
+    }
+
+    public void CompleteLeverSequence()
+    {
+        if (puzzleState != PuzzleState.LeverSequencePlaying)
+        {
+            return;
+        }
+
+        puzzleState = PuzzleState.Solved;
+        SetHint(string.Empty);
 
         LeverPulled?.Invoke();
     }

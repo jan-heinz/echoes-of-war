@@ -42,12 +42,14 @@ public class InkDialogue : MonoBehaviour
 
     [Header("Gameplay Triggers")]
     [SerializeField] private RadioTutorialPuzzle radioTutorialPuzzle;
+    [SerializeField] private RadioPostPullAnimation radioPostPullAnimation;
     [SerializeField] private CipherController cipherController;
     [SerializeField] private bool useChannelSubmissionEvents;
     [SerializeField] private string trueChannelFoundKnot;
     [SerializeField] private string incorrectChannelSubmittedKnot;
     [SerializeField] private string rightKnobTunedKnot;
     [SerializeField] private string incorrectRightKnobSubmittedKnot;
+    [SerializeField] private string intelligencePageUnlockedKnot;
     [SerializeField] private string leverPulledKnot;
 
     [Header("UI")]
@@ -126,6 +128,11 @@ public class InkDialogue : MonoBehaviour
             radioTutorialPuzzle.LeverPulled += HandleLeverPulled;
         }
 
+        if (radioPostPullAnimation != null)
+        {
+            radioPostPullAnimation.IntelligencePageUnlocked += HandleIntelligencePageUnlocked;
+        }
+
         if (newspaperPopup != null)
         {
             newspaperPopup.Closed += HandleNewspaperClosed;
@@ -150,6 +157,11 @@ public class InkDialogue : MonoBehaviour
 
             radioTutorialPuzzle.RightKnobTuned -= HandleRightKnobTuned;
             radioTutorialPuzzle.LeverPulled -= HandleLeverPulled;
+        }
+
+        if (radioPostPullAnimation != null)
+        {
+            radioPostPullAnimation.IntelligencePageUnlocked -= HandleIntelligencePageUnlocked;
         }
 
         if (newspaperPopup != null)
@@ -277,6 +289,16 @@ public class InkDialogue : MonoBehaviour
         StartDialogueAtKnot(leverPulledKnot);
     }
 
+    private void HandleIntelligencePageUnlocked()
+    {
+        if (string.IsNullOrWhiteSpace(intelligencePageUnlockedKnot))
+        {
+            return;
+        }
+
+        StartDialogueAtKnot(intelligencePageUnlockedKnot);
+    }
+
     // validates inspector 
     private bool ValidateSetup()
     {
@@ -390,6 +412,11 @@ public class InkDialogue : MonoBehaviour
         {
             dialoguePanel.SetActive(false);
         }
+
+        if (cipherController != null)
+        {
+            cipherController.NotifyDialogueFinished();
+        }
     }
 
     // starts a new dialogue sequence at the given knot
@@ -415,6 +442,10 @@ public class InkDialogue : MonoBehaviour
         isPausedForPopup = false;
         StopLineReveal();
         HideNextDayButton();
+        if (cipherController != null)
+        {
+            cipherController.NotifyDialogueStarted();
+        }
 
         if (!TryEnterKnot(knotName))
         {
@@ -549,6 +580,21 @@ public class InkDialogue : MonoBehaviour
         {
             Debug.LogWarning("InkDialogue: cipherController is not assigned. Cannot show cipher puzzle.");
             return;
+        }
+
+        StopLineReveal();
+        if (dialogueText != null)
+        {
+            dialogueText.text = string.Empty;
+        }
+        ClearDialogueProgress();
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(false);
+        }
+        if (dialogueClickTarget != null)
+        {
+            dialogueClickTarget.interactable = false;
         }
 
         cipherController.StartPuzzle();

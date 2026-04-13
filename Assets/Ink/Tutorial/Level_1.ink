@@ -27,6 +27,10 @@ Click on the red level to decode the message.
 === incorrect_tuning ===
 That tuning is not quite right. Keep adjusting and lock in your choice when you are confident. # speaker:fern
 -> END
+
+=== intelligence_page_unlocked ===
+Click on the type writer to view the intercepted message. # speaker:fern
+-> END
  
  ===lever_pulled==
 Now, if this were a real message, you would report to an offier with what you found out. # speaker:fern

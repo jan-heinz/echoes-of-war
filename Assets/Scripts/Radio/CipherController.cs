@@ -19,6 +19,12 @@ public class CipherController : MonoBehaviour
     [Tooltip("Optional: assign a panel to show/hide with the puzzle.")]
     public GameObject messagePanel;
 
+    [Header("Intercept Log")]
+    [Tooltip("Optional intelligence page popup used as the container for this puzzle.")]
+    [SerializeField] private NewspaperPopup intelligencePopup;
+    [Tooltip("Optional close button on the intelligence page. Hidden while the puzzle is active.")]
+    [SerializeField] private Button intelligenceCloseButton;
+
     [Header("Word Display")]
     [Tooltip("One TMP label per word, in sentence order (10 total).")]
     public List<TextMeshProUGUI> wordLabels;
@@ -74,6 +80,7 @@ public class CipherController : MonoBehaviour
     private float heldTimer = 0f;
     private string lastKey = "";
     private bool first = false;
+    private bool reopenInterceptLogAfterDialogue;
 
     // ROYGBIV colors mapped for TMP display
     private static readonly Dictionary<CipherColor, Color> ColorMap = new Dictionary<CipherColor, Color>
@@ -90,30 +97,21 @@ public class CipherController : MonoBehaviour
     // ── Unity Lifecycle ─────────────────────────────────────────────────
     void Start()
     {
-        StartPuzzle();
-
         foreach (var word in UnicornCipherPuzzle.Words)
             selectedColors.Add(word.StartingColor);
 
         RefreshAllWords();
         StartCoroutine(PlaceHornAfterLayout());
-        inkDialogue.StartDialogueAtKnot("Unicorn_Start");
+        if (!started)
+        {
+            StartPuzzle();
+        }
     }
 
     void Update()
     {
         if (solved) return;
         if (!started) return;
-        if (inkDialogue != null && inkDialogue.IsDialogueActive)
-        {
-            // Reset horn sprite if dialogue became active while W/S was held
-            if (lastKey == "W" || lastKey == "S")
-            {
-                SetHornSprite(false);
-                lastKey = "";
-            }
-            return;
-        }
         HandleInput();
     }
 
@@ -298,8 +296,10 @@ public class CipherController : MonoBehaviour
     public void StartPuzzle()
     {
         gameObject.SetActive(true);
+        if (intelligencePopup != null) intelligencePopup.ShowExistingText();
         if (messagePanel != null) messagePanel.SetActive(true);
         if (hornSprite != null)   hornSprite.SetActive(true);
+        SetIntelligenceCloseButtonVisible(true);
         started = true;
     }
 
@@ -310,6 +310,8 @@ public class CipherController : MonoBehaviour
     {
         if (messagePanel != null) messagePanel.SetActive(false);
         if (hornSprite != null)   hornSprite.SetActive(false);
+        if (intelligencePopup != null) intelligencePopup.Hide();
+        SetIntelligenceCloseButtonVisible(true);
         gameObject.SetActive(false);
     }
 
@@ -338,6 +340,38 @@ public class CipherController : MonoBehaviour
         HidePuzzle();
     }
 
+    public void NotifyDialogueStarted()
+    {
+        if (intelligencePopup == null || !intelligencePopup.IsOpen)
+        {
+            return;
+        }
+
+        intelligencePopup.Hide();
+        reopenInterceptLogAfterDialogue = true;
+    }
+
+    public void NotifyDialogueFinished()
+    {
+        if (!reopenInterceptLogAfterDialogue || intelligencePopup == null || intelligencePopup.IsOpen)
+        {
+            return;
+        }
+
+        reopenInterceptLogAfterDialogue = false;
+        intelligencePopup.ShowExistingText();
+
+        if (messagePanel != null)
+        {
+            messagePanel.SetActive(true);
+        }
+
+        if (hornSprite != null)
+        {
+            hornSprite.SetActive(!solved);
+        }
+    }
+
     // ── Audio ────────────────────────────────────────────────────────────
     void PlayColorSound(CipherColor color)
     {
@@ -359,5 +393,15 @@ public class CipherController : MonoBehaviour
             case "S": return kb.sKey.isPressed;
             default:  return false;
         }
+    }
+
+    void SetIntelligenceCloseButtonVisible(bool visible)
+    {
+        if (intelligenceCloseButton == null)
+        {
+            return;
+        }
+
+        intelligenceCloseButton.gameObject.SetActive(visible);
     }
 }
