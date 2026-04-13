@@ -337,9 +337,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 5984489100469367315, guid: 085b9e177bcc387489468796285d7bc3, type: 3}
+  m_Sprite: {fileID: 5984489100469367315, guid: cce2d261827360749b30eb4a517bc6e9, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -6294,11 +6294,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4a553b923ad14a079911a8c4a286e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InkDialogue
-  compiledInkJson: {fileID: 4900000, guid: ac150f2dfe49a4625aef221f495ce333, type: 3}
+  compiledInkJson: {fileID: 4900000, guid: 36347c313362072439a051b4554993cc, type: 3}
   startKnot: start
   nextKnots:
   - briefing
   radioTutorialPuzzle: {fileID: 659512995}
+  cipherController: {fileID: 0}
   useChannelSubmissionEvents: 1
   trueChannelFoundKnot: found_frequency
   incorrectChannelSubmittedKnot: incorrect_frequency
@@ -6330,6 +6331,9 @@ MonoBehaviour:
   speakers:
   - speakerId: fern
     displayName: Fern
+    portrait: {fileID: -1041287022619471339, guid: 1978fc0afd2cd43c89b7aae03ba7180e, type: 3}
+  - speakerId: player
+    displayName: Player
     portrait: {fileID: -1041287022619471339, guid: 1978fc0afd2cd43c89b7aae03ba7180e, type: 3}
 --- !u!4 &1865461103
 Transform:

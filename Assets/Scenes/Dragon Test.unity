@@ -4916,7 +4916,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 16.12, y: -735.3529}
+  m_AnchoredPosition: {x: 16.120003, y: -735.3529}
   m_SizeDelta: {x: 32.24, y: 670.7058}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1217838083
@@ -7789,8 +7789,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4a553b923ad14a079911a8c4a286e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InkDialogue
-  compiledInkJson: {fileID: 4900000, guid: ac150f2dfe49a4625aef221f495ce333, type: 3}
-  startKnot: start
+  compiledInkJson: {fileID: 4900000, guid: eb24584a24feaf649a9025ac1c6c88c5, type: 3}
+  startKnot: 
   nextKnots:
   - briefing
   radioTutorialPuzzle: {fileID: 659512995}
@@ -7814,6 +7814,13 @@ MonoBehaviour:
   hidePanelWhenDone: 1
   choiceButtonPrefab: {fileID: 4023961962736079748, guid: ea8a31232a50daf4fad61b4ba45d5567, type: 3}
   choiceContainer: {fileID: 988372745}
+  nextDayButtonRoot: {fileID: 0}
+  nextDayButton: {fileID: 0}
+  transitionSceneName: Transition
+  nextDaySceneName: 
+  nextDayTransitionMessages:
+  - Next Day
+  nextDayFadeDurationSeconds: 0.45
   speakers:
   - speakerId: fern
     displayName: Fern

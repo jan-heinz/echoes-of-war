@@ -21,6 +21,7 @@ public class InkDialogue : MonoBehaviour
     private const string UiTagPrefix = "ui:";
     private const string DisplayNewspaperCommand = "display_newspaper";
     private const string HideSubtitlesCommand = "hide_subtitles";
+    private const string ShowCipherCommand = "show_cipher";
 
     [Serializable]
     private class SpeakerVisual
@@ -41,6 +42,7 @@ public class InkDialogue : MonoBehaviour
 
     [Header("Gameplay Triggers")]
     [SerializeField] private RadioTutorialPuzzle radioTutorialPuzzle;
+    [SerializeField] private CipherController cipherController;
     [SerializeField] private bool useChannelSubmissionEvents;
     [SerializeField] private string trueChannelFoundKnot;
     [SerializeField] private string incorrectChannelSubmittedKnot;
@@ -517,6 +519,12 @@ public class InkDialogue : MonoBehaviour
                 HideSubtitleText();
                 continue;
             }
+
+            if (string.Equals(command, ShowCipherCommand, StringComparison.OrdinalIgnoreCase))
+            {
+                ShowCipherPuzzle();
+                return true;
+            }
         }
 
         return false;
@@ -534,7 +542,19 @@ public class InkDialogue : MonoBehaviour
         radioTutorialPuzzle.HideSubtitleText();
     }
 
-    // opens newspaper popup and pauses dialogue 
+    // activates the cipher puzzle
+    private void ShowCipherPuzzle()
+    {
+        if (cipherController == null)
+        {
+            Debug.LogWarning("InkDialogue: cipherController is not assigned. Cannot show cipher puzzle.");
+            return;
+        }
+
+        cipherController.StartPuzzle();
+    }
+
+    // opens newspaper popup and pauses dialogue
     private void ShowNewspaperPopup()
     {
         if (newspaperPopup == null)

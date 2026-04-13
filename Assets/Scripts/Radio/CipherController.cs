@@ -52,6 +52,16 @@ public class CipherController : MonoBehaviour
     [Tooltip("How long the glow takes to fade in then out (seconds).")]
     public float glowDuration = 0.35f;
 
+    [Header("Audio")]
+    [Tooltip("AudioSource used to play all cipher sounds.")]
+    public AudioSource audioSource;
+    [Tooltip("One clip per color, indexed by CipherColor enum (0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Blue, 5=Indigo, 6=Violet).")]
+    public AudioClip[] colorSounds = new AudioClip[7];
+    [Tooltip("Plays when the selected word's color becomes correct.")]
+    public AudioClip wordCorrectSound;
+    [Tooltip("Plays when the entire sentence is solved.")]
+    public AudioClip sentenceCorrectSound;
+
     [Header("Ink Dialogue")]
     [SerializeField] private InkDialogue inkDialogue;
 
@@ -191,6 +201,14 @@ public class CipherController : MonoBehaviour
 
         RefreshWord(cursorIndex);
 
+        // Color-change sound
+        PlayColorSound(selectedColors[cursorIndex]);
+
+        // Word-correct sound
+        if (UnicornCipherPuzzle.Words[cursorIndex].IsSolved(selectedColors[cursorIndex])
+            && wordCorrectSound != null && audioSource != null)
+            audioSource.PlayOneShot(wordCorrectSound);
+
         if (glowImage != null && hornCursor != null)
         {
             glowImage.rectTransform.position = new Vector3(
@@ -306,6 +324,8 @@ public class CipherController : MonoBehaviour
 
         solved = true;
         if (hornSprite != null) hornSprite.SetActive(false);
+        if (sentenceCorrectSound != null && audioSource != null)
+            audioSource.PlayOneShot(sentenceCorrectSound);
         inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
     }
@@ -316,6 +336,15 @@ public class CipherController : MonoBehaviour
     public void HideAfterDialogue()
     {
         HidePuzzle();
+    }
+
+    // ── Audio ────────────────────────────────────────────────────────────
+    void PlayColorSound(CipherColor color)
+    {
+        if (audioSource == null) return;
+        int idx = (int)color;
+        if (colorSounds != null && idx < colorSounds.Length && colorSounds[idx] != null)
+            audioSource.PlayOneShot(colorSounds[idx]);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
