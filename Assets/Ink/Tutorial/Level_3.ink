@@ -16,7 +16,6 @@ I don't think this is right. # speaker:player
  
 === lever_pulled ===
 # ui:hide_subtitles
-# ui:show_cipher
 -> END
 
 ===Dragon_Start===
