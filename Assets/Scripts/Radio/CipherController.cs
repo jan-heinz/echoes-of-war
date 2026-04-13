@@ -81,6 +81,7 @@ public class CipherController : MonoBehaviour
     private string lastKey = "";
     private bool first = false;
     private bool reopenInterceptLogAfterDialogue;
+    private bool pendingSolvedDialogueOnClose;
 
     // ROYGBIV colors mapped for TMP display
     private static readonly Dictionary<CipherColor, Color> ColorMap = new Dictionary<CipherColor, Color>
@@ -95,6 +96,22 @@ public class CipherController : MonoBehaviour
     };
 
     // ── Unity Lifecycle ─────────────────────────────────────────────────
+    void OnEnable()
+    {
+        if (intelligencePopup != null)
+        {
+            intelligencePopup.Closed += HandleIntelligencePopupClosed;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (intelligencePopup != null)
+        {
+            intelligencePopup.Closed -= HandleIntelligencePopupClosed;
+        }
+    }
+
     void Start()
     {
         foreach (var word in UnicornCipherPuzzle.Words)
@@ -328,7 +345,11 @@ public class CipherController : MonoBehaviour
         if (hornSprite != null) hornSprite.SetActive(false);
         if (sentenceCorrectSound != null && audioSource != null)
             audioSource.PlayOneShot(sentenceCorrectSound);
-        inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
+        pendingSolvedDialogueOnClose = intelligencePopup != null && intelligencePopup.IsOpen;
+        if (!pendingSolvedDialogueOnClose)
+        {
+            inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
+        }
         Debug.Log("Puzzle solved! The message is: We have formed an alliance with the dragons and sirens");
     }
 
@@ -403,5 +424,16 @@ public class CipherController : MonoBehaviour
         }
 
         intelligenceCloseButton.gameObject.SetActive(visible);
+    }
+
+    void HandleIntelligencePopupClosed()
+    {
+        if (!pendingSolvedDialogueOnClose)
+        {
+            return;
+        }
+
+        pendingSolvedDialogueOnClose = false;
+        inkDialogue.StartDialogueAtKnot("Unicorn_Solve");
     }
 }

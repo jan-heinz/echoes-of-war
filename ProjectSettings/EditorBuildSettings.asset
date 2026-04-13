@@ -29,6 +29,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Transition.unity
     guid: 77c5f04cf05934ce78face05b733696f
+  - enabled: 1
+    path: Assets/Scenes/Dragon Test.unity
+    guid: 608b080a44750c34db66cfff09d1d157
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
