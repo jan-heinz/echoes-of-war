@@ -73,7 +73,7 @@ We should do our best to protect our citizens against such vicious enemies. We l
 === Horn ===
 Thanks for your input! I'm going to report to the other officers. # speaker: fern
 
-There is no Gazette out this week, but during decoding you obtained an enemy artifact you can look over. #speaker:player
+There is no Gazette out this week, but during decoding I obtained an enemy artifact I can look over. #speaker:player
 # ui:display_newspaper
 -> END
 

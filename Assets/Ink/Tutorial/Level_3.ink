@@ -1,3 +1,24 @@
+=== found_frequency ===
+I think I got the right frequency. #speaker:player
+-> END
+
+=== incorrect_frequency ===
+I don't think this is the right frequency. # speaker:player
+-> END
+
+=== right_knob_tuned ===
+That sounds good! # speaker:player
+-> END
+
+=== incorrect_tuning ===
+I don't think this is right. # speaker:player
+-> END
+ 
+=== lever_pulled ===
+# ui:hide_subtitles
+# ui:show_cipher
+-> END
+
 ===Dragon_Start===
 They must have used dragon magic on top of unicorn magic to double-encrypt this message. Now, instead of easily changing the colors with the unicorn horn, you will need to manually shift the color cypher for each word. There should be a clue word showing you what color to shift them all to. # speaker:fern 
 
