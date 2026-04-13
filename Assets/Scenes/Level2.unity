@@ -9803,7 +9803,7 @@ MonoBehaviour:
   hornYOffset: -0.75
   inputRepeatDelay: 0.15
   glowImage: {fileID: 16335621}
-  glowYOffset: 0.65
+  glowYOffset: 0.95
   glowDuration: 0.35
   audioSource: {fileID: 1151666371}
   colorSounds:
