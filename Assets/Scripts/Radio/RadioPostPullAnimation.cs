@@ -12,6 +12,7 @@ public class RadioPostPullAnimation : MonoBehaviour
     [SerializeField] private GameObject juicerExecuteAnimationView;
     [SerializeField] private Animator juicerExecuteAnimator;
     [SerializeField] private AnimationClip juicerExecuteAnimationClip;
+    [SerializeField] private JuicerAnimationSfx juicerAnimationSfx;
     [SerializeField] private float fallbackDurationSeconds = 1f;
 
     private Coroutine playRoutine;
@@ -86,6 +87,11 @@ public class RadioPostPullAnimation : MonoBehaviour
 
         SetViewActive(juicerIdleView, false);
         ResetAnimator(juicerExecuteAnimator);
+        if (juicerAnimationSfx != null)
+        {
+            juicerAnimationSfx.PlaySequence();
+        }
+
         yield return new WaitForSeconds(GetDuration(juicerExecuteAnimationClip));
 
         if (juicerExecuteAnimationView != null)
