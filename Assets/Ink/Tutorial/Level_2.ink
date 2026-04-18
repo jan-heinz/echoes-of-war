@@ -39,9 +39,9 @@ It seems that word is unencrypted already, so no need to mess with the color! #s
 
 ===Unicorn_Solve===
 Oh no! I mean, amazing work, but the message isn't good news. However, now you can interpret, report, and strategize as per usual. #speaker:fern
-+ [The dragons and sirens have begun communicating with each other.] -> Talk
-+ [The dragons and sirens are plotting a war strategy together.] -> Plot
-+ [The dragons and sirens are planning a coordinated attack.] -> Attack
++ [The dragons and sirens have begun communicating with the unicorns.] -> Talk
++ [The dragons, sirens, and unicorns are plotting a war strategy together.] -> Plot
++ [The dragons, sirens, and unicorns are planning a coordinated attack.] -> Attack
 
 === Talk ===
 We were hoping they wouldn’t be so quick to talk amongst themselves. #speaker:fern

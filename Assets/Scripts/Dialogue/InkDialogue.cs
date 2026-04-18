@@ -44,6 +44,7 @@ public class InkDialogue : MonoBehaviour
     [SerializeField] private RadioTutorialPuzzle radioTutorialPuzzle;
     [SerializeField] private RadioPostPullAnimation radioPostPullAnimation;
     [SerializeField] private CipherController cipherController;
+    [SerializeField] private DragonCipherController dragonCipherController;
     [SerializeField] private bool useChannelSubmissionEvents;
     [SerializeField] private string trueChannelFoundKnot;
     [SerializeField] private string incorrectChannelSubmittedKnot;
@@ -417,6 +418,11 @@ public class InkDialogue : MonoBehaviour
         {
             cipherController.NotifyDialogueFinished();
         }
+
+        if (dragonCipherController != null)
+        {
+            dragonCipherController.NotifyDialogueFinished();
+        }
     }
 
     // starts a new dialogue sequence at the given knot
@@ -445,6 +451,11 @@ public class InkDialogue : MonoBehaviour
         if (cipherController != null)
         {
             cipherController.NotifyDialogueStarted();
+        }
+
+        if (dragonCipherController != null)
+        {
+            dragonCipherController.NotifyDialogueStarted();
         }
 
         if (!TryEnterKnot(knotName))
@@ -576,9 +587,9 @@ public class InkDialogue : MonoBehaviour
     // activates the cipher puzzle
     private void ShowCipherPuzzle()
     {
-        if (cipherController == null)
+        if (cipherController == null && dragonCipherController == null)
         {
-            Debug.LogWarning("InkDialogue: cipherController is not assigned. Cannot show cipher puzzle.");
+            Debug.LogWarning("InkDialogue: no cipher controller is assigned. Cannot show cipher puzzle.");
             return;
         }
 
@@ -597,7 +608,14 @@ public class InkDialogue : MonoBehaviour
             dialogueClickTarget.interactable = false;
         }
 
-        cipherController.StartPuzzle();
+        if (dragonCipherController != null)
+        {
+            dragonCipherController.StartPuzzle();
+        }
+        else
+        {
+            cipherController.StartPuzzle();
+        }
     }
 
     // opens newspaper popup and pauses dialogue
@@ -981,6 +999,11 @@ public class InkDialogue : MonoBehaviour
         private void ShowChoices()
     {
         dialogueClickTarget.interactable = false;
+        var clickImage = dialogueClickTarget.GetComponent<Image>();
+        if (clickImage != null) clickImage.raycastTarget = false;
+
+        if (dragonCipherController != null)
+            dragonCipherController.NotifyDialogueStarted();
 
         // Clear old buttons
         foreach (Transform child in choiceContainer)
@@ -1009,7 +1032,20 @@ public class InkDialogue : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        var clickImage = dialogueClickTarget.GetComponent<Image>();
+        if (clickImage != null) clickImage.raycastTarget = true;
         dialogueClickTarget.interactable = true;
+
+        // Capture creature choice before advancing so Level 3 knows which puzzle to show.
+        // Only overwrites GameState when a creature keyword is present, so first-level
+        // choices (Talk / Plot / Attack) which name no creature are safely ignored.
+        var choiceText = story.currentChoices[index].text.ToLower();
+        if (choiceText.Contains("dragon"))
+            GameState.Level2CreatureChoice = GameState.CreatureChoice.Dragon;
+        else if (choiceText.Contains("siren"))
+            GameState.Level2CreatureChoice = GameState.CreatureChoice.Siren;
+        else if (choiceText.Contains("unicorn"))
+            GameState.Level2CreatureChoice = GameState.CreatureChoice.Unicorn;
 
         story.ChooseChoiceIndex(index);
         RefreshDialogueProgressFromCurrentState();

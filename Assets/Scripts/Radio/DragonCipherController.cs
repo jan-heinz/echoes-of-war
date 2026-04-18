@@ -49,6 +49,10 @@ public class DragonCipherController : MonoBehaviour
     // ── Unity Lifecycle ───────────────────────────────────────────────────────
     void Start()
     {
+        // Use the siren variant only if the player explicitly chose the dragon option in Level 2.
+        // Everything else (dragon, unicorn, or no choice yet) defaults to the dragon message.
+        useDragonMessage = GameState.Level2CreatureChoice != GameState.CreatureChoice.Dragon;
+
         activeWords   = useDragonMessage ? DragonCipherPuzzle.DragonWords : DragonCipherPuzzle.SirenWords;
         correctAnswer = useDragonMessage ? DragonCipherPuzzle.DragonAnswer : DragonCipherPuzzle.SirenAnswer;
 
@@ -131,7 +135,14 @@ public class DragonCipherController : MonoBehaviour
             if (hintButton != null) hintButton.SetActive(false);
             if (answerInput != null) answerInput.gameObject.SetActive(false);
             if (feedbackLabel != null) feedbackLabel.text = "";
-            if (inkDialogue != null) inkDialogue.StartDialogueAtKnot("Dragon_Solve");
+            if (inkDialogue != null)
+            {
+                if (useDragonMessage)
+                {
+                    inkDialogue.StartDialogueAtKnot("Dragon_Solve");
+                } else {
+                    inkDialogue.StartDialogueAtKnot("Siren_Solve");}
+            }
         }
         else
         {
@@ -156,11 +167,22 @@ public class DragonCipherController : MonoBehaviour
             answerInput.text = "";
             answerInput.interactable = true;
         }
-        if (hintButton != null) hintButton.SetActive(true);
+        if (hintButton != null) hintButton.SetActive(false);
         if (feedbackLabel != null) feedbackLabel.text = "";
         if (inkDialogue != null)
             inkDialogue.StartDialogueAtKnot("Dragon_Start");
         started = true;
+    }
+
+    public void NotifyDialogueStarted()
+    {
+        if (hintButton != null) hintButton.SetActive(false);
+    }
+
+    public void NotifyDialogueFinished()
+    {
+        if (solved) { hintButton?.SetActive(false); return; }
+        hintButton?.SetActive(started);
     }
 
     /// <summary>
