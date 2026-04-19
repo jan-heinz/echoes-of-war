@@ -628,6 +628,17 @@ public class InkDialogue : MonoBehaviour
         }
 
         StopLineReveal();
+
+        if (dragonCipherController != null)
+        {
+            dragonCipherController.HidePuzzle();
+        }
+
+        if (cipherController != null)
+        {
+            cipherController.HidePuzzle();
+        }
+
         newspaperPopup.ShowDefault();
         if (!newspaperPopup.IsOpen)
         {
@@ -673,6 +684,16 @@ public class InkDialogue : MonoBehaviour
 
         if (dialoguePanel == null || !dialoguePanel.activeSelf)
         {
+            if (dragonCipherController != null)
+            {
+                dragonCipherController.HidePuzzle();
+            }
+
+            if (cipherController != null)
+            {
+                cipherController.HidePuzzle();
+            }
+
             ShowNextDayButton();
         }
     }

@@ -8432,6 +8432,7 @@ MonoBehaviour:
   radioTutorialPuzzle: {fileID: 659512995}
   radioPostPullAnimation: {fileID: 659512996}
   cipherController: {fileID: 2134052408}
+  dragonCipherController: {fileID: 0}
   useChannelSubmissionEvents: 1
   trueChannelFoundKnot: found_frequency
   incorrectChannelSubmittedKnot: incorrect_frequency

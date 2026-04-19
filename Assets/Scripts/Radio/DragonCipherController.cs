@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using DragonCipher;
+using UnityEngine.UI;
 
 /// <summary>
 /// Attach to a GameObject in the Dragon Cipher scene.
@@ -29,6 +30,10 @@ public class DragonCipherController : MonoBehaviour
     [Tooltip("Separate hint button GameObject. Activated when the puzzle starts, deactivated when solved.")]
     public GameObject hintButton;
 
+    [Header("Intercept Log")]
+    [Tooltip("Optional intelligence page popup used as the container for this puzzle.")]
+    [SerializeField] private NewspaperPopup intelligencePopup;
+
     [Header("Answer Input")]
     [Tooltip("The TMP InputField where the player types their decoded answer.")]
     public TMP_InputField answerInput;
@@ -45,6 +50,7 @@ public class DragonCipherController : MonoBehaviour
     private string correctAnswer;
     private bool solved  = false;
     private bool started = false;
+    private bool reopenInterceptLogAfterDialogue;
 
     // ── Unity Lifecycle ───────────────────────────────────────────────────────
     void Start()
@@ -176,11 +182,34 @@ public class DragonCipherController : MonoBehaviour
 
     public void NotifyDialogueStarted()
     {
+        if (intelligencePopup != null && intelligencePopup.IsOpen)
+        {
+            intelligencePopup.Hide();
+            reopenInterceptLogAfterDialogue = true;
+        }
+
         if (hintButton != null) hintButton.SetActive(false);
     }
 
     public void NotifyDialogueFinished()
     {
+        if (reopenInterceptLogAfterDialogue && intelligencePopup != null && !intelligencePopup.IsOpen)
+        {
+            reopenInterceptLogAfterDialogue = false;
+            intelligencePopup.ShowExistingText();
+        }
+
+        if (messagePanel != null)
+        {
+            messagePanel.SetActive(started);
+        }
+
+        if (answerInput != null)
+        {
+            answerInput.gameObject.SetActive(started && !solved);
+            answerInput.interactable = started && !solved;
+        }
+
         if (solved) { hintButton?.SetActive(false); return; }
         hintButton?.SetActive(started);
     }
@@ -201,6 +230,28 @@ public class DragonCipherController : MonoBehaviour
     /// </summary>
     public void HidePuzzle()
     {
+        if (messagePanel != null)
+        {
+            messagePanel.SetActive(false);
+        }
+
+        if (hintButton != null)
+        {
+            hintButton.SetActive(false);
+        }
+
+        if (answerInput != null)
+        {
+            answerInput.gameObject.SetActive(false);
+            answerInput.interactable = false;
+        }
+
+        if (intelligencePopup != null)
+        {
+            intelligencePopup.Hide();
+        }
+
+        reopenInterceptLogAfterDialogue = false;
         gameObject.SetActive(false);
     }
 
