@@ -1,2 +1,2 @@
-# Decode
-A semester long project for GAME3800
+# Echoes of War
+https://abetterplayer.itch.io/echoes-of-war
